@@ -29,6 +29,42 @@ ipcRenderer.on("docker:fail", () => {
   document.getElementById("dockerStatus").innerHTML = "Fail";
 })
 
+ipcRenderer.on("docker:note", (event, msg) => {
+  console.log(msg);
+  document.getElementById("dockerNote").innerHTML = msg;
+})
+
+ipcRenderer.on("env:pass", () => {
+  document.getElementById("wslEnvStatus").innerHTML = "Ready"
+})
+
+ipcRenderer.on("env:fail", (event, msg) => {
+  document.getElementById("wslEnvStatus").innerHTML = msg
+})
+
 window.onload = function () {
   ipcRenderer.send('wsl:check');
 }
+
+document.getElementById('wslEnvSetup').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('wsl:envSetup');
+});
+
+document.getElementById('imgPull').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('docker:pull');
+});
+
+document.getElementById('imgRun').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('docker:run');
+});
+
+ipcRenderer.on("docker:pullMsg", (event, msg) => {
+  document.getElementById("imgPullConsole").innerHTML = msg;
+})
+
+ipcRenderer.on("docker:imgReady", () => {
+  document.getElementById("mlgPullStatus").innerHTML = "Ready";
+})
