@@ -142,6 +142,7 @@ function checkImage() {
   try {
     let res = execSync("wsl sudo docker images");
     let so = res.toString('utf8').replace(/\0/g, '');
+    console.log(so);
     if (so.includes(mlperfImage)) {
       mainWindow.webContents.send("docker:imgReady")
     }
