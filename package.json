@@ -10,7 +10,6 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "electronWebpack": {
-    "title": "MLBench",
     "renderer": {
       "template": "src/renderer/index.html"
     }

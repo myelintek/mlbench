@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 import { exec, spawn, execSync } from 'child_process'
@@ -48,6 +48,9 @@ function createMainWindow() {
       window.focus()
     })
   })
+
+  const mainMenu = Menu.buildFromTemplate([]);
+  Menu.setApplicationMenu(mainMenu);
 
   return window
 }

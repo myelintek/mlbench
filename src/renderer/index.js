@@ -54,7 +54,7 @@ ipcRenderer.on("docker:note", (event, msg) => {
 })
 
 ipcRenderer.on("nv:pass", () => {
-  document.getElementById("nvStatus").innerHTML = "Ready"
+  document.getElementById("nvStatus").innerHTML = "Pass"
 })
 
 ipcRenderer.on("nv:fail", () => {
