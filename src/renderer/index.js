@@ -62,9 +62,9 @@ document.getElementById('imgRun').addEventListener('click', (event) => {
 });
 
 ipcRenderer.on("docker:pullMsg", (event, msg) => {
-  document.getElementById("imgPullConsole").innerHTML = msg;
+  document.getElementById("imgPullConsole").innerHTML += "</br>"+msg;
 })
 
 ipcRenderer.on("docker:imgReady", () => {
-  document.getElementById("mlgPullStatus").innerHTML = "Ready";
+  document.getElementById("imgPullStatus").innerHTML = "Ready";
 })
