@@ -1,1 +1,13 @@
 read more from https://webpack.electron.build/#quick-start
+
+### ubuntu
+```
+echo "`whoami` ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
+```
+
+### yarn
+```
+npm install -g yarn
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+yarn --version
+```
