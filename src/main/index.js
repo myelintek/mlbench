@@ -172,7 +172,7 @@ function checkNvidia() {
   } catch (err) {
     let msg = err.output.toString()
     console.log(msg)
-    mainWindow.webContents.send("nv:pass");
+    mainWindow.webContents.send("nv:fail");
     mainWindow.webContents.send("nv:status", msg);
   }
 }
