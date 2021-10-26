@@ -6,23 +6,34 @@
   <hr>
   <div class="p-3">
     <button type="button" class="btn btn-primary" id="wslCheckBtn">Check</button>
-    <table class="table">
+    <table class="table" style="table-layout: fixed;">
       <thead>
         <tr>
-          <th>Item</th>
-          <th>Status</th>
-          <th>Notes</th>
+          <th style="width: 25%">Item</th>
+          <th style="width: 10%">Status</th>
+          <th style="width: 65%">Notes</th>
         </tr>  
       </thead>
       <tr>
         <td>WSL2</td>
         <td id="wslStatus">Unknown</td>
-        <td id="wslNote"></td>
+        <td>
+          <pre id="wslNote"></pre>
+        </td>
       </tr>
       <tr>
-        <td>Ubuntu 20.04</td>
+        <td>WSL2 Ubuntu 20.04</td>
         <td id="ubStatus">Unknown</td>
-        <td id="ubNote"></td>
+        <td>
+          <pre id="ubNote"></pre>
+        </td>
+      </tr>
+      <tr>
+        <td>Ubuntu sudoer NOPASSWD</td>
+        <td id="sudonpStatus">Unknown</td>
+        <td id="sudonpNote">
+          echo "`whoami` ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
+        </td>
       </tr>
       <tr>
         <td>Docker</td>
@@ -30,9 +41,11 @@
         <td id="dockerNote"></td>
       </tr>
       <tr>
-        <td>CUDA</td>
-        <td id="cudaStatus">Unknown</td>
-        <td id="cudaNote"></td>
+        <td>Nvidia Driver</td>
+        <td id="nvStatus">Unknown</td>
+        <td>
+          <pre id="nvNote"></pre>
+        </td>
       </tr>
     </table>  
   </div>
@@ -51,7 +64,7 @@
     <p>Create/Pull the benchmark docker image. <b>cr.myelintek.com/mlcommon/mlperf-inference:x86_64</b></p>
     <button type="button" class="btn btn-primary" id="imgPull">Pull</button>
     <label id="imgPullStatus">Not Ready</label>
-    <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:300px;" id="imgPullConsole">
+    <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;" id="imgPullConsole">
 
     </div>
     <p>Start the benchmark container which has all dependencies set up for preprocessing data and running benchmarks</p>
@@ -342,5 +355,11 @@ offline_expected_qps = 5000
     </table>  
   </div>
   <hr>
+  <h1>9. Results</h1>
+  <hr>
+  <div class="p-3">
+    <p>TODO display results</p>
+    <canvas id="chart"></canvas>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </body>

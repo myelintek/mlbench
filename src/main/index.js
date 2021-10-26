@@ -14,7 +14,14 @@ const mlperfImage = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
 let mainWindow
 
 function createMainWindow() {
-  const window = new BrowserWindow({webPreferences: {nodeIntegration: true}})
+  const window = new BrowserWindow({
+    width: 1100,
+    height: 800,
+    title: "MLPerf - Inferencing",
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
 
   // if (isDevelopment) {
   //   window.webContents.openDevTools()
@@ -77,8 +84,10 @@ app.on('ready', () => {
 
 function checkWSL() {
   try {
-    execSync("wsl --status");
+    let res = execSync("wsl --status");
+    let so = res.toString("utf8").replace(/\0/g, '');
     mainWindow.webContents.send("wsl:pass");
+    mainWindow.webContents.send("wsl:note", so);
   } catch (err) {
     mainWindow.webContents.send("wsl:fail");
   }
@@ -91,6 +100,8 @@ function checkUbuntu() {
     let so = res.toString("utf8").replace(/\0/g, '');
     if (so.includes("Ubuntu-20.04")) {
       mainWindow.webContents.send("ub:pass");
+      console.log(so)
+      mainWindow.webContents.send("ub:note", so)
     }
   } catch (err) {
     console.log(err.message)
@@ -98,11 +109,25 @@ function checkUbuntu() {
   }
 }
 
+function sudonpStatus() {
+  try {
+    let res = execSync("wsl sudo -n true")
+    mainWindow.webContents.send("sudo:pass")
+  } catch (err) {
+    mainWindow.webContents.send("sudo:fail")
+  }
+}
 function checkDocker() {
   try {
-    let res = execSync("wsl service docker status");
-    let so = res.toString('utf8').replace(/\0/g, '');
-    mainWindow.webContents.send("docker:pass");
+    // let res = execSync("wsl service docker status");
+    let res = execSync('wsl bash -c "service docker status | grep Active"');
+    let so = res.toString('utf8');
+    if (so.includes('running')) {
+      mainWindow.webContents.send("docker:pass");
+      res = execSync("wsl dockerd --version");
+      so = res.toString('utf8').replace(/\0/g, '');
+      mainWindow.webContents.send("docker:note", so);
+    }
   } catch (err) {
     let msg = err.output.toString()
     mainWindow.webContents.send("docker:fail");
@@ -138,6 +163,20 @@ function imgPull() {
   }
 }
 
+function checkNvidia() {
+  try {
+    let res = execSync("wsl nvidia-smi");
+    let so = res.toString('utf8');
+    mainWindow.webContents.send("nv:pass")
+    mainWindow.webContents.send("nv:status", so)
+  } catch (err) {
+    let msg = err.output.toString()
+    console.log(msg)
+    mainWindow.webContents.send("nv:pass");
+    mainWindow.webContents.send("nv:status", msg);
+  }
+}
+
 function checkImage() {
   try {
     let res = execSync("wsl sudo docker images");
@@ -165,9 +204,11 @@ function imgRun() {
 ipcMain.on('wsl:check', () => {
   checkWSL();
   checkUbuntu();
+  sudonpStatus();
   checkDocker();
   setupEnv();
-  checkImage();
+  checkNvidia();
+  // checkImage();
 });
 
 ipcMain.on('wsl:envSetup', () => {
