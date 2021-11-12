@@ -19,13 +19,14 @@ function createMainWindow() {
     height: 800,
     title: "MLPerf - Inferencing",
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      webviewTag: true
     }
   })
 
-  // if (isDevelopment) {
-  //   window.webContents.openDevTools()
-  // }
+  if (isDevelopment) {
+    window.webContents.openDevTools()
+  }
 
   if (isDevelopment) {
     window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
@@ -205,6 +206,7 @@ function imgRun() {
 }
 
 ipcMain.on('wsl:check', () => {
+  console.log("wsl:check");
   checkWSL();
   checkUbuntu();
   sudonpStatus();

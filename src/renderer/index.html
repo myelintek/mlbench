@@ -1,365 +1,440 @@
 <head>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bs-stepper/dist/css/bs-stepper.min.css" integrity="sha384-qMhYxsMd/tIFRNt3QjOFfDoDdMUCWR5v2sCzrB3MPbZqs5Osdq41JCmLJJPURa+o" crossorigin="anonymous">
 </head>
 <body>
-  <h1>1. System Check</h1>
-  <hr>
-  <div class="p-3">
-    <button type="button" class="btn btn-primary" id="wslCheckBtn">Check</button>
-    <table class="table" style="table-layout: fixed;">
-      <thead>
-        <tr>
-          <th style="width: 25%">Item</th>
-          <th style="width: 10%">Status</th>
-          <th style="width: 65%">Notes</th>
-        </tr>  
-      </thead>
-      <tr>
-        <td>WSL2</td>
-        <td id="wslStatus">Unknown</td>
-        <td>
-          <pre id="wslNote"></pre>
-        </td>
-      </tr>
-      <tr>
-        <td>WSL2 Ubuntu 20.04</td>
-        <td id="ubStatus">Unknown</td>
-        <td>
-          <pre id="ubNote"></pre>
-        </td>
-      </tr>
-      <tr>
-        <td>Ubuntu sudoer NOPASSWD</td>
-        <td id="sudonpStatus">Unknown</td>
-        <td id="sudonpNote">
-          echo "`whoami` ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
-        </td>
-      </tr>
-      <tr>
-        <td>Docker</td>
-        <td id="dockerStatus">Unknown</td>
-        <td id="dockerNote"></td>
-      </tr>
-      <tr>
-        <td>Nvidia Driver</td>
-        <td id="nvStatus">Unknown</td>
-        <td>
-          <pre id="nvNote"></pre>
-        </td>
-      </tr>
-    </table>  
-  </div>
-  <hr>
-  <h1>2. Setup Environment</h1>
-  <hr>
-  <div class="p-3">
-    <p>Create folders C:\mlperf to store data, models, preprocessed data and results of running benchmarks, it's shared among models</p>
-    <button type="button" class="btn btn-primary" id="wslEnvSetup">Setup</button>
-    <label id="wslEnvStatus">Not Ready</label>
-  </div>
-  <hr>
-  <h1>3. Launching the environment (make prebuild)</h1>
-  <hr>
-  <div class="p-3">
-    <p>Create/Pull the benchmark docker image. <b>cr.myelintek.com/mlcommon/mlperf-inference:x86_64</b></p>
-    <button type="button" class="btn btn-primary" id="imgPull">Pull</button>
-    <label id="imgPullStatus">Not Ready</label>
-    <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;" id="imgPullConsole">
-
+  <div id="stepper1" class="bs-stepper">
+    <div class="bs-stepper-header" role="tablist">
+      <!-- your steps here -->
+      <div class="step active" data-target="#system-check">
+        <button type="button" class="step-trigger" role="tab" aria-controls="system-check" id="system-check-trigger">
+          <span class="bs-stepper-circle">1</span>
+          <span class="bs-stepper-label">Check System</span>
+        </button>
+      </div>
+      <div class="line"></div>
+      <div class="step" data-target="#setup-lunch-environment">
+        <button type="button" class="step-trigger" role="tab" aria-controls="setup-lunch-environment" id="setup-lunch-environment-trigger" aria-selected="false" disabled="disabled">
+          <span class="bs-stepper-circle">2</span>
+          <span class="bs-stepper-label">Setup&Launch</span>
+        </button>
+      </div>
+      <div class="line"></div>
+      <div class="step" data-target="#check-gpu">
+        <button type="button" class="step-trigger" role="tab" aria-controls="check-gpu" id="check-gpu-trigger" aria-selected="false" disabled="disabled">
+          <span class="bs-stepper-circle">3</span>
+          <span class="bs-stepper-label">Check GPU</span>
+        </button>
+      </div>
+      <div class="line"></div>
+      <div class="step" data-target="#check-scenario">
+        <button type="button" class="step-trigger" role="tab" aria-controls="check-scenario" id="check-scenario-trigger" aria-selected="false" disabled="disabled">
+          <span class="bs-stepper-circle">4</span>
+          <span class="bs-stepper-label">Check Scenario</span>
+        </button>
+      </div>
+      <div class="line"></div>
+      <div class="step" data-target="#download">
+        <button type="button" class="step-trigger" role="tab" aria-controls="download" id="download-trigger" aria-selected="false" disabled="disabled">
+          <span class="bs-stepper-circle">5</span>
+          <span class="bs-stepper-label">Download</span>
+        </button>
+      </div>
+      <div class="line"></div>
+      <div class="step" data-target="#run-benchmark">
+        <button type="button" class="step-trigger" role="tab" aria-controls="run-benchmark" id="run-benchmark-trigger" aria-selected="false" disabled="disabled">
+          <span class="bs-stepper-circle">6</span>
+          <span class="bs-stepper-label">Run Benchmark</span>
+        </button>
+      </div>
+      <div class="line"></div>
+      <div class="step" data-target="#results">
+        <button type="button" class="step-trigger" role="tab" aria-controls="results" id="results-trigger" aria-selected="false" disabled="disabled">
+          <span class="bs-stepper-circle">7</span>
+          <span class="bs-stepper-label">Results</span>
+        </button>
+      </div>
     </div>
-    <p>Start the benchmark container which has all dependencies set up for preprocessing data and running benchmarks</p>
-    <p>TODO, export MLPERF_SCRATCH_PATH, make prebuild</p>
-    <button type="button" class="btn btn-primary" id="imgRun">Run</button>
-    <label id="imgRunStatus">Not Ready</label>
+    <div class="bs-stepper-content">
+      <!-- your steps content here -->
+      <div id="system-check" class="bs-stepper-pane active dstepper-block" role="tabpanel" aria-labelledby="system-check-trigger">
+        <div class="p-3">
+          <table class="table" style="table-layout: fixed;">
+            <thead>
+              <tr>
+                <th style="width: 25%">Item</th>
+                <th style="width: 10%">Status</th>
+                <!-- <th style="width: 65%">Notes</th> -->
+              </tr>  
+            </thead>
+            <tr>
+              <td>WSL2</td>
+              <td id="wslStatus">Unknown</td>
+              <!-- <td>
+                <pre id="wslNote"></pre>
+              </td> -->
+            </tr>
+            <tr>
+              <td>WSL2 Ubuntu 20.04</td>
+              <td id="ubStatus">Unknown</td>
+              <!-- <td>
+                <pre id="ubNote"></pre>
+              </td> -->
+            </tr>
+            <tr>
+              <td>Ubuntu sudoer NOPASSWD</td>
+              <td id="sudonpStatus">Unknown</td>
+              <!-- <td id="sudonpNote">
+                echo "`whoami` ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
+              </td> -->
+            </tr>
+            <tr>
+              <td>Docker</td>
+              <td id="dockerStatus">Unknown</td>
+              <!-- <td id="dockerNote"></td> -->
+            </tr>
+            <tr>
+              <td>Nvidia Driver</td>
+              <td id="nvStatus">Unknown</td>
+              <!-- <td>
+                <pre id="nvNote"></pre>
+              </td> -->
+            </tr>
+          </table>
+          <button type="button" class="btn btn-primary" id="wslCheckBtn">Check</button>
+        </div>
+        <hr>
+        <button id="nextButton">Next</button>
+      </div>
+      <div id="setup-lunch-environment" class="bs-stepper-pane" role="tabpanel" aria-labelledby="setup-lunch-environment-trigger">
+        <h1>Setup Environment</h1>
+        <hr>
+          <div class="p-3">
+              <p>Create folders C:\mlperf to store data, models, preprocessed data and results of running benchmarks, it's shared among models</p>
+              <button type="button" class="btn btn-primary" id="wslEnvSetup">Setup</button>
+              <label id="wslEnvStatus">Not Ready</label>
+          </div>
+        <hr>
+        <h1>Launching the environment (make prebuild)</h1>
+        <hr>
+          <div class="p-3">
+          <p>Create/Pull the benchmark docker image. <b>cr.myelintek.com/mlcommon/mlperf-inference:x86_64</b></p>
+          <button type="button" class="btn btn-primary" id="imgPull">Pull</button>
+          <label id="imgPullStatus">Not Ready</label>
+          <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;" id="imgPullConsole">
+      
+          </div>
+          <p>Start the benchmark container which has all dependencies set up for preprocessing data and running benchmarks</p>
+          <p>TODO, export MLPERF_SCRATCH_PATH, make prebuild</p>
+          <button type="button" class="btn btn-primary" id="imgRun">Run</button>
+          <label id="imgRunStatus">Not Ready</label>
+          </div>
+        <hr>
+        <button id="prevButton">Previous</button>
+        <button id="nextButton1">Next</button>
+      </div>
+      <div id="check-gpu" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-gpu-trigger">
+        <div class="p-3">
+          <p>TODO check system GPU in the support list</p>
+          <p>Supported system list in code/common/system_list.py</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nvidia-smi Name</th>
+                <th>PCI IDs</th>
+                <th>Architecture</th>
+                <th>GPU counts</th>
+              </tr>  
+            </thead>
+            <tr>
+              <td>A100-PCIE-40GB</td>
+              <td>["20F1", "20BF"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1, 2, 8]</td>
+            </tr>
+            <tr>
+              <td>A100-PCIE-80GB</td>
+              <td>["20B5"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1, 2, 8]</td>
+            </tr>
+            <tr>
+              <td>A100-SXM4-40GB</td>
+              <td>["20B0"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1, 8]</td>
+            </tr>
+            <tr>
+              <td>A100-SXM-80GB</td>
+              <td>["20B2"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1, 4, 8]</td>
+            </tr>
+            <tr>
+              <td>GeForce RTX 3080</td>
+              <td>["2206"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1]</td>
+            </tr>
+            <tr>
+              <td>["GeForce RTX 3090", "Quadro RTX A6000", "RTX A6000"]</td>
+              <td>["2204", "2230"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1]</td>
+            </tr>
+            <tr>
+              <td>"A10"</td>
+              <td>["2236"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1, 8]</td>
+            </tr>
+            <tr>
+              <td>["Tesla T4", "T4 32GB"]</td>
+              <td>["1EB8", "1EB9"]</td>
+              <td>Architecture.Turing</td>
+              <td>[1, 8, 20]</td>
+            </tr>
+            <tr>
+              <td>["A30"]</td>
+              <td>["20B7"]</td>
+              <td>Architecture.Ampere</td>
+              <td>[1, 8]</td>
+            </tr>
+          </table>  
+        </div>
+        <hr>
+        <button id="prevButton1">Previous</button>    
+        <button id="nextButton2">Next</button>
+      </div>
+      <div id="check-scenario" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-scenario-trigger">
+        <div class="p-3">
+          <p>TODO check benchmark scenario</p>
+          <p>Supported configuration in configs/benchmark/scenario/__init__.py</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Scenario</th>
+                <th>Class</th>
+                <th>Configuration</th>
+              </tr>  
+            </thead>
+            <tr>
+              <td>ResNet50</td>
+              <td>Offline</td>
+              <td>RTX3080_PCIe_20GBx1</td>
+              <td>
+                <pre>
+      system = System("GeForceRTX3080", Architecture.Ampere, 1)
+      gpu_inference_streams = 1
+      input_dtype = "int8"
+      input_format = "linear"
+      map_path = "data_maps/imagenet/val_map.txt"
+      precision = "int8"
+      tensor_path = "${PREPROCESSED_DATA_DIR}/imagenet/ResNet50/int8_linear"
+      use_graphs = False
+      gpu_batch_size = 512
+      gpu_copy_streams = 2
+      run_infer_on_copy_streams = False
+      scenario = Scenario.Offline
+      benchmark = Benchmark.ResNet50
+      offline_expected_qps = 9000
+                </pre>
+              </td>
+            </tr>
+            <tr>
+              <td>SSD-Resnet34</td>
+              <td>Offline</td>
+              <td>RTX3080_PCIe_20GBx1</td>
+              <td>
+                <pre>
+      system = System("GeForceRTX3080", Architecture.Ampere, 1)
+      input_dtype = "int8"
+      input_format = "linear"
+      map_path = "data_maps/coco/val_map.txt"
+      precision = "int8"
+      tensor_path = "${PREPROCESSED_DATA_DIR}/coco/val2017/SSDResNet34/int8_linear"
+      use_graphs = False
+      gpu_batch_size = 32
+      gpu_copy_streams = 4
+      gpu_inference_streams = 1
+      scenario = Scenario.Offline
+      benchmark = Benchmark.SSDResNet34
+      offline_expected_qps = 400
+                </pre>
+              </td>
+            </tr>
+            <tr>
+              <td>SSD-Mobilenet</td>
+              <td>Offline</td>
+              <td>RTX3080_PCIe_20GBx1</td>
+              <td>
+                <pre>
+      system = System("GeForceRTX3080", Architecture.Ampere, 1)
+      gpu_inference_streams = 1
+      input_dtype = "int8"
+      map_path = "data_maps/coco/val_map.txt"
+      precision = "int8"
+      use_graphs = False
+      gpu_batch_size = 768
+      gpu_copy_streams = 2
+      input_format = "chw4"
+      tensor_path = "${PREPROCESSED_DATA_DIR}/coco/val2017/SSDMobileNet/int8_chw4"
+      scenario = Scenario.Offline
+      benchmark = Benchmark.SSDMobileNet
+      offline_expected_qps = 19000
+                </pre>
+              </td>
+            </tr>
+            <tr>
+              <td>Bert</td>
+              <td>Offline</td>
+              <td>RTX3080_PCIe_20GBx1</td>
+              <td>
+                <pre>
+      system = System("GeForceRTX3080", Architecture.Ampere, 1)
+      precision = "fp16"
+      gpu_batch_size = 256
+      benchmark = Benchmark.BERT
+      offline_expected_qps = 5000
+                </pre>
+              </td>
+            </tr>
+          </table>  
+        </div>
+        <hr>
+        <button id="prevButton2">Previous</button>    
+        <button id="nextButton3">Next</button>
+      </div>
+      <div id="download" class="bs-stepper-pane" role="tabpanel" aria-labelledby="download-trigger">
+        <h1>Download the Model files</h1>
+        <hr>
+        <div class="p-3">
+          <p>TODO, download the pretrained model files</p>
+          <p>make download_model BENCHMARKS="resnet50 ssd-resnet34 ssd-mobilenet bert dlrm rnnt 3d-unet"</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Notes</th>
+              </tr>  
+            </thead>
+            <tr>
+              <td>resnet50</td>
+              <td id="resnet50Status">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/models/ResNet50</td>
+            </tr>
+            <tr>
+              <td>ssd-resnet34</td>
+              <td id="ssd-resnet34Status">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/models/SSDResNet34</td>
+            </tr>
+            <tr>
+              <td>ssd-mobilenet</td>
+              <td id="ssd-mobilenetStatus">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/models/SSDMobileNet</td>
+            </tr>
+            <tr>
+              <td>bert</td>
+              <td id="bertStatus">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/models/bert</td>
+            </tr>
+          </table>  
+        </div>
+        <hr>
+        <h1>Download the Preprocessed datasets</h1>
+        <hr>
+        <div class="p-3">
+          <p>TODO download the Preprocessed datasets, output of make preprocess_data</p>
+          <p>make preprocess_data BENCHMARKS="resnet50 ssd-resnet34 ssd-mobilenet bert dlrm rnnt 3d-unet"</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Dataset</th>
+                <th>Status</th>
+                <th>Notes</th>
+              </tr>  
+            </thead>
+            <tr>
+              <td>resnet50</td>
+              <td>ImageNet 2012 Validation Set</td>
+              <td id="imagenetStatus">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/imagenet</td>
+            </tr>
+            <tr>
+              <td>ssd-resnet34</td>
+              <td>COCO 2017 Dataset</td>
+              <td id="cocoStatus">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
+            </tr>
+            <tr>
+              <td>ssd-mobilenet</td>
+              <td>COCO 2017 Dataset</td>
+              <td id="cocoStatus">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
+            </tr>
+            <tr>
+              <td>bert</td>
+              <td>SQuAD v1.1</td>
+              <td id="squadStatus">Unknown</td>
+              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/squad_tokenized</td>
+            </tr>
+          </table>  
+        </div>
+        <hr>
+        <button id="prevButton3">Previous</button>
+        <button id="nextButton4">Next</button>
+      </div>
+      <div id="run-benchmark" class="bs-stepper-pane" role="tabpanel" aria-labelledby="run-benchmark-trigger">
+        <div class="p-3">
+          <p>TODO run benchmarks</p>
+          <p>make run RUN_ARGS="--benchmarks=resnet50,rnnt,bert --scenarios=offline,server"</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Scenario</th>
+                <th>Status</th>
+              </tr>  
+            </thead>
+            <tr>
+              <td>ResNet50</td>
+              <td>Offline</td>
+              <td>Unknown</td>
+            </tr>
+            <tr>
+              <td>SSD-Resnet34</td>
+              <td>Offline</td>
+              <td>Unknown</td>
+            </tr>
+            <tr>
+              <td>SSD-Mobilenet</td>
+              <td>Offline</td>
+              <td>Unknown</td>
+            </tr>
+            <tr>
+              <td>Bert</td>
+              <td>Offline</td>
+              <td>Unknown</td>
+            </tr>
+          </table>  
+        </div>
+        <hr>
+        <button id="prevButton4">Previous</button>
+        <button id="nextButton5">Next</button>
+      </div>
+      <div id="results" class="bs-stepper-pane" role="tabpanel" aria-labelledby="results-trigger">
+        <div class="p-3">
+          <p>TODO display results</p>
+          <canvas id="chart"></canvas>
+        </div>
+        <hr>
+        <button id="prevButton5">Previous</button>
+      </div>
+    </div>
   </div>
-  <hr>
-  <h1>4. Download the Model files</h1>
-  <hr>
-  <div class="p-3">
-    <p>TODO, download the pretrained model files</p>
-    <p>make download_model BENCHMARKS="resnet50 ssd-resnet34 ssd-mobilenet bert dlrm rnnt 3d-unet"</p>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Status</th>
-          <th>Notes</th>
-        </tr>  
-      </thead>
-      <tr>
-        <td>resnet50</td>
-        <td id="resnet50Status">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/models/ResNet50</td>
-      </tr>
-      <tr>
-        <td>ssd-resnet34</td>
-        <td id="ssd-resnet34Status">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/models/SSDResNet34</td>
-      </tr>
-      <tr>
-        <td>ssd-mobilenet</td>
-        <td id="ssd-mobilenetStatus">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/models/SSDMobileNet</td>
-      </tr>
-      <tr>
-        <td>bert</td>
-        <td id="bertStatus">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/models/bert</td>
-      </tr>
-    </table>  
-  </div>
-  <hr>
-  <h1>5. Download the Preprocessed datasets</h1>
-  <hr>
-  <div class="p-3">
-    <p>TODO download the Preprocessed datasets, output of make preprocess_data</p>
-    <p>make preprocess_data BENCHMARKS="resnet50 ssd-resnet34 ssd-mobilenet bert dlrm rnnt 3d-unet"</p>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Dataset</th>
-          <th>Status</th>
-          <th>Notes</th>
-        </tr>  
-      </thead>
-      <tr>
-        <td>resnet50</td>
-        <td>ImageNet 2012 Validation Set</td>
-        <td id="imagenetStatus">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/preprocessed_data/imagenet</td>
-      </tr>
-      <tr>
-        <td>ssd-resnet34</td>
-        <td>COCO 2017 Dataset</td>
-        <td id="cocoStatus">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
-      </tr>
-      <tr>
-        <td>ssd-mobilenet</td>
-        <td>COCO 2017 Dataset</td>
-        <td id="cocoStatus">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
-      </tr>
-      <tr>
-        <td>bert</td>
-        <td>SQuAD v1.1</td>
-        <td id="squadStatus">Unknown</td>
-        <td>$MLPERF_SCRATCH_PATH/preprocessed_data/squad_tokenized</td>
-      </tr>
-    </table>  
-  </div>
-  <hr>
-  <h1>6. Check supported GPU models</h1>
-  <hr>
-  <div class="p-3">
-    <p>TODO check system GPU in the support list</p>
-    <p>Supported system list in code/common/system_list.py</p>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nvidia-smi Name</th>
-          <th>PCI IDs</th>
-          <th>Architecture</th>
-          <th>GPU counts</th>
-        </tr>  
-      </thead>
-      <tr>
-        <td>A100-PCIE-40GB</td>
-        <td>["20F1", "20BF"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1, 2, 8]</td>
-      </tr>
-      <tr>
-        <td>A100-PCIE-80GB</td>
-        <td>["20B5"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1, 2, 8]</td>
-      </tr>
-      <tr>
-        <td>A100-SXM4-40GB</td>
-        <td>["20B0"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1, 8]</td>
-      </tr>
-      <tr>
-        <td>A100-SXM-80GB</td>
-        <td>["20B2"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1, 4, 8]</td>
-      </tr>
-      <tr>
-        <td>GeForce RTX 3080</td>
-        <td>["2206"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1]</td>
-      </tr>
-      <tr>
-        <td>["GeForce RTX 3090", "Quadro RTX A6000", "RTX A6000"]</td>
-        <td>["2204", "2230"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1]</td>
-      </tr>
-      <tr>
-        <td>"A10"</td>
-        <td>["2236"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1, 8]</td>
-      </tr>
-      <tr>
-        <td>["Tesla T4", "T4 32GB"]</td>
-        <td>["1EB8", "1EB9"]</td>
-        <td>Architecture.Turing</td>
-        <td>[1, 8, 20]</td>
-      </tr>
-      <tr>
-        <td>["A30"]</td>
-        <td>["20B7"]</td>
-        <td>Architecture.Ampere</td>
-        <td>[1, 8]</td>
-      </tr>
-    </table>  
-  </div>
-  <hr>
-  <h1>7. Check benchmark scenario</h1>
-  <hr>
-  <div class="p-3">
-    <p>TODO check benchmark scenario</p>
-    <p>Supported configuration in configs/benchmark/scenario/__init__.py</p>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Scenario</th>
-          <th>Class</th>
-          <th>Configuration</th>
-        </tr>  
-      </thead>
-      <tr>
-        <td>ResNet50</td>
-        <td>Offline</td>
-        <td>RTX3080_PCIe_20GBx1</td>
-        <td>
-          <pre>
-system = System("GeForceRTX3080", Architecture.Ampere, 1)
-gpu_inference_streams = 1
-input_dtype = "int8"
-input_format = "linear"
-map_path = "data_maps/imagenet/val_map.txt"
-precision = "int8"
-tensor_path = "${PREPROCESSED_DATA_DIR}/imagenet/ResNet50/int8_linear"
-use_graphs = False
-gpu_batch_size = 512
-gpu_copy_streams = 2
-run_infer_on_copy_streams = False
-scenario = Scenario.Offline
-benchmark = Benchmark.ResNet50
-offline_expected_qps = 9000
-          </pre>
-        </td>
-      </tr>
-      <tr>
-        <td>SSD-Resnet34</td>
-        <td>Offline</td>
-        <td>RTX3080_PCIe_20GBx1</td>
-        <td>
-          <pre>
-system = System("GeForceRTX3080", Architecture.Ampere, 1)
-input_dtype = "int8"
-input_format = "linear"
-map_path = "data_maps/coco/val_map.txt"
-precision = "int8"
-tensor_path = "${PREPROCESSED_DATA_DIR}/coco/val2017/SSDResNet34/int8_linear"
-use_graphs = False
-gpu_batch_size = 32
-gpu_copy_streams = 4
-gpu_inference_streams = 1
-scenario = Scenario.Offline
-benchmark = Benchmark.SSDResNet34
-offline_expected_qps = 400
-          </pre>
-        </td>
-      </tr>
-      <tr>
-        <td>SSD-Mobilenet</td>
-        <td>Offline</td>
-        <td>RTX3080_PCIe_20GBx1</td>
-        <td>
-          <pre>
-system = System("GeForceRTX3080", Architecture.Ampere, 1)
-gpu_inference_streams = 1
-input_dtype = "int8"
-map_path = "data_maps/coco/val_map.txt"
-precision = "int8"
-use_graphs = False
-gpu_batch_size = 768
-gpu_copy_streams = 2
-input_format = "chw4"
-tensor_path = "${PREPROCESSED_DATA_DIR}/coco/val2017/SSDMobileNet/int8_chw4"
-scenario = Scenario.Offline
-benchmark = Benchmark.SSDMobileNet
-offline_expected_qps = 19000
-          </pre>
-        </td>
-      </tr>
-      <tr>
-        <td>Bert</td>
-        <td>Offline</td>
-        <td>RTX3080_PCIe_20GBx1</td>
-        <td>
-          <pre>
-system = System("GeForceRTX3080", Architecture.Ampere, 1)
-precision = "fp16"
-gpu_batch_size = 256
-benchmark = Benchmark.BERT
-offline_expected_qps = 5000
-          </pre>
-        </td>
-      </tr>
-    </table>  
-  </div>
-  <hr>
-  <h1>8. Run Benchmarks</h1>
-  <hr>
-  <div class="p-3">
-    <p>TODO run benchmarks</p>
-    <p>make run RUN_ARGS="--benchmarks=resnet50,rnnt,bert --scenarios=offline,server"</p>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Scenario</th>
-          <th>Status</th>
-        </tr>  
-      </thead>
-      <tr>
-        <td>ResNet50</td>
-        <td>Offline</td>
-        <td>Unknown</td>
-      </tr>
-      <tr>
-        <td>SSD-Resnet34</td>
-        <td>Offline</td>
-        <td>Unknown</td>
-      </tr>
-      <tr>
-        <td>SSD-Mobilenet</td>
-        <td>Offline</td>
-        <td>Unknown</td>
-      </tr>
-      <tr>
-        <td>Bert</td>
-        <td>Offline</td>
-        <td>Unknown</td>
-      </tr>
-    </table>  
-  </div>
-  <hr>
-  <h1>9. Results</h1>
-  <hr>
-  <div class="p-3">
-    <p>TODO display results</p>
-    <canvas id="chart"></canvas>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bs-stepper/dist/js/bs-stepper.min.js" integrity="sha384-eqEnJ05qXHDr1RVtRHxkDbr0hzBxQBDDTyTYVWBWiaYzSZlkVxkkhhcSKrO8l7p9" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </body>

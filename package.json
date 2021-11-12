@@ -11,11 +11,15 @@
   },
   "electronWebpack": {
     "renderer": {
+      "sourceDirectory": "src/renderer",
       "template": "src/renderer/index.html"
     }
   },
   "dependencies": {
+    "bs-stepper": "^1.7.0",
     "chart.js": "^3.6.0",
+    "electron-tabs": "^0.15.0",
+    "remote": "^0.2.6",
     "source-map-support": "^0.5.16"
   },
   "devDependencies": {

@@ -1,6 +1,57 @@
+// // npm install --save electron-tabs
 const { ipcRenderer } = require('electron');
+const Stepper = require('bs-stepper');
 const Chart = require('chart.js');
 
+var stepper1 = new Stepper(document.querySelector('#stepper1'))
+
+document.getElementById('nextButton').addEventListener('click', (event) => {
+    stepper1.next();
+});
+
+document.getElementById('prevButton').addEventListener('click', (event) => {
+    stepper1.previous();
+});
+
+document.getElementById('nextButton1').addEventListener('click', (event) => {
+  stepper1.next();
+});
+
+document.getElementById('prevButton1').addEventListener('click', (event) => {
+  stepper1.previous();
+});
+
+document.getElementById('nextButton2').addEventListener('click', (event) => {
+  stepper1.next();
+});
+
+document.getElementById('prevButton2').addEventListener('click', (event) => {
+  stepper1.previous();
+});
+
+document.getElementById('nextButton3').addEventListener('click', (event) => {
+  stepper1.next();
+});
+
+document.getElementById('prevButton3').addEventListener('click', (event) => {
+  stepper1.previous();
+});
+
+document.getElementById('nextButton4').addEventListener('click', (event) => {
+  stepper1.next();
+});
+
+document.getElementById('prevButton4').addEventListener('click', (event) => {
+  stepper1.previous();
+});
+
+document.getElementById('nextButton5').addEventListener('click', (event) => {
+  stepper1.next();
+});
+
+document.getElementById('prevButton5').addEventListener('click', (event) => {
+  stepper1.previous();
+});
 
 document.getElementById('wslCheckBtn').addEventListener('click', (event) => {
   event.preventDefault();
@@ -48,10 +99,10 @@ ipcRenderer.on("docker:fail", () => {
   document.getElementById("dockerStatus").innerHTML = "Fail";
 })
 
-ipcRenderer.on("docker:note", (event, msg) => {
-  console.log(msg);
-  document.getElementById("dockerNote").innerHTML = msg;
-})
+// ipcRenderer.on("docker:note", (event, msg) => {
+//   console.log(msg);
+//   document.getElementById("dockerNote").innerHTML = msg;
+// })
 
 ipcRenderer.on("nv:pass", () => {
   document.getElementById("nvStatus").innerHTML = "Pass"
@@ -61,9 +112,9 @@ ipcRenderer.on("nv:fail", () => {
   document.getElementById("nvStatus").innerHTML = "Fail"
 })
 
-ipcRenderer.on("nv:status", (event, msg) => {
-  document.getElementById("nvNote").innerHTML = msg;
-})
+// ipcRenderer.on("nv:status", (event, msg) => {
+//   document.getElementById("nvNote").innerHTML = msg;
+// })
 
 ipcRenderer.on("env:pass", () => {
   document.getElementById("wslEnvStatus").innerHTML = "Ready"
