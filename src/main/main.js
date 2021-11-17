@@ -295,6 +295,32 @@ function imgRun() {
   }
 }
 
+
+function list_supported_systems(){
+  try{
+    // Get gpu name from nvidia-smi
+    let res = execSync('wsl bash -c "nvidia-smi --query-gpu=gpu_name --format=csv | sed 1d "');
+    let gpu_name_raw = res.toString('utf8').replace(/\0/g, '');
+    let gpu_name_raw_1 = gpu_name_raw.toString('utf8').replace(/\n/g, '');
+    let gpu_name = gpu_name_raw_1.replace('NVIDIA ', '');
+    console.log(gpu_name)
+    // Send a command to execute a python script inside our running docker container
+    let res1 = execSync('wsl bash -c "docker exec mlperf-inference-mlsteam-x86_64 python print_supported_systems.py"');
+    let supported_systems = res1.toString('utf8').replace(/\0/g, '');
+    console.log(supported_systems)
+    if (supported_systems.includes(gpu_name)){
+      console.log("Current system "+ gpu_name+" is supported!");
+    } else{
+      console.log("Current system "+ gpu_name+" is not supported, need to add manually");
+    }
+  }catch (err){
+    let msg = err.output.toString();
+    console.log(msg)
+  }
+  
+}
+
+
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
   checkWSL();
@@ -316,4 +342,5 @@ ipcMain.on('docker:pull', () => {
 
 ipcMain.on('docker:run', () => {
   imgRun();
+  list_supported_systems();
 })
