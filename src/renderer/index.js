@@ -151,6 +151,14 @@ ipcRenderer.on("docker:imgReady", () => {
   document.getElementById("imgPullStatus").innerHTML = "Ready";
 })
 
+ipcRenderer.on("docker:run_pass", () => {
+  document.getElementById("imgRunStatus").innerHTML = "Ready";
+})
+
+ipcRenderer.on("docker:run_fail", () => {
+  document.getElementById("imgRunStatus").innerHTML = "Failed";
+})
+
 var ctx = document.getElementById('chart').getContext('2d');
 var chart = new Chart(ctx, {
   type: 'bar',
