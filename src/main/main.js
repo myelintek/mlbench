@@ -8,11 +8,12 @@ import { exec, spawn, execSync } from 'child_process'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 // const shell = require("./exec.js").shell
-const mlperfImage = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
-
+// const MLPERF_IMAGE_NAME = "cr.myelintek.com/mlcommon/mlperf-inference"
+const MLPERF_IMAGE = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
+const CONTAINER_NAME = "mlperf-inference-x86_64"
 const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
 
-const CONTAINER_NAME = "mlbenchmarks"
+// const CONTAINER_NAME = "mlbenchmarks"
 
 var hostname
 
@@ -149,8 +150,9 @@ function checkDocker() {
 
 function setupEnv() {
   try {
-    execSync("wsl mkdir -p "+MLPERF_SCRATCH_PATH+" "+MLPERF_SCRATCH_PATH+"/data "+MLPERF_SCRATCH_PATH+"/models "+MLPERF_SCRATCH_PATH+"/preprocessed_data")
+    execSync("wsl mkdir -p "+MLPERF_SCRATCH_PATH+" "+MLPERF_SCRATCH_PATH+"/data "+MLPERF_SCRATCH_PATH+"/models "+MLPERF_SCRATCH_PATH+"/preprocessed_data");
     execSync("wsl export MLPERF_SCRATCH_PATH="+MLPERF_SCRATCH_PATH);
+    // execSync("wsl export DOCKER_IMAGE_NAME="+MLPERF_IMAGE_NAME);
     mainWindow.webContents.send("env:pass");
   } catch (err) {
     let msg = err.output.toString()
@@ -161,7 +163,7 @@ function setupEnv() {
 function imgPull() {
   try {
     console.log('Hi')
-    let pullprocess = exec("wsl sudo docker pull " + mlperfImage)
+    let pullprocess = exec("wsl sudo docker pull " + MLPERF_IMAGE)
     pullprocess.stdout.on('data', function (data) {
       console.log(data);
       mainWindow.webContents.send("docker:pullMsg", data);
@@ -197,7 +199,7 @@ function checkImage() {
     let res = execSync("wsl sudo docker images");
     let so = res.toString('utf8').replace(/\0/g, '');
     console.log(so);
-    if (so.includes(mlperfImage)) {
+    if (so.includes(MLPERF_IMAGE)) {
       mainWindow.webContents.send("docker:imgReady")
     }
   } catch (err) {
@@ -210,7 +212,7 @@ function checkImage() {
 function echoContainer(){
 // Make sure that the container is up and running by sending an echo command inside the container
   try{
-    let res1 = execSync('wsl bash -c "docker exec mlperf-inference-mlsteam-x86_64 echo \"Hello_world\" " ');
+    let res1 = execSync('wsl bash -c "docker exec '+CONTAINER_NAME+' echo \"Hello_world\" " ');
     let so1 = res1.toString('utf8').replace(/\0/g, '');
     if  (so1.includes("Hello_world")) {
       mainWindow.webContents.send("docker:run_pass");
@@ -241,12 +243,13 @@ function runDocker() {
     // --user 1000:1000 --net host --device /dev/fuse \
     // -v $(MLPERF_SCRATCH_PATH):$(MLPERF_SCRATCH_PATH)  \
     // -e MLPERF_SCRATCH_PATH=$(MLPERF_SCRATCH_PATH) \
-    // -e HOST_HOSTNAME="+  hostname+ " "+mlperfImage);
+    // -e HOST_HOSTNAME="+  hostname+ " "+MLPERF_IMAGE);
 
     // Need to check if we already have a container running
     let res1 = execSync('wsl bash -c "docker ps" ');
     let so1 = res1.toString('utf8').replace(/\0/g, '');
-    if (so1.includes("mlperf-inference-mlsteam-x86_64")){
+    // console.log(so1)
+    if (so1.includes(CONTAINER_NAME)){
       console.log("Container already running! Don't need to build")
     } else{
       // Probably don't need to build the image if we have already pulled it, should be the same image, just need to map the paths correctly using prebuild
@@ -306,7 +309,8 @@ function list_supported_systems(){
     let gpu_name = gpu_name_raw_1.replace('NVIDIA ', '');
     console.log(gpu_name)
     // Send a command to execute a python script inside our running docker container
-    let res1 = execSync('wsl bash -c "docker exec mlperf-inference-mlsteam-x86_64 python print_supported_systems.py"');
+    // console.log("Target container: "+ CONTAINER_NAME);
+    let res1 = execSync('wsl bash -c "docker exec '+CONTAINER_NAME+' python print_supported_systems.py"');
     let supported_systems = res1.toString('utf8').replace(/\0/g, '');
     console.log(supported_systems)
     if (supported_systems.includes(gpu_name)){
