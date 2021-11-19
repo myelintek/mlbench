@@ -131,7 +131,7 @@ function sudonpStatus() {
 function checkDocker() {
   try {
     // let res = execSync("wsl service docker status");
-    let res = execSync('wsl bash -c "service docker status | grep Active"');
+    let res = execSync('wsl bash -c "service docker status | grep running"');
     let so = res.toString('utf8');
     if (so.includes('running')) {
       mainWindow.webContents.send("docker:pass");
