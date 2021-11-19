@@ -53,6 +53,7 @@ document.getElementById('prevButton5').addEventListener('click', (event) => {
   stepper1.previous();
 });
 
+// Button "Check"
 document.getElementById('wslCheckBtn').addEventListener('click', (event) => {
   event.preventDefault();
   ipcRenderer.send('wsl:check');
@@ -66,9 +67,9 @@ ipcRenderer.on("wsl:fail", () => {
   document.getElementById("wslStatus").innerHTML = "Fail";
 })
 
-ipcRenderer.on("wsl:note", (event, msg) => {
-  document.getElementById("wslNote").innerHTML = msg;
-});
+// ipcRenderer.on("wsl:note", (event, msg) => {
+//   document.getElementById("wslNote").innerHTML = msg;
+// });
 
 ipcRenderer.on("ub:pass", () => {
   document.getElementById("ubStatus").innerHTML = "Pass";
@@ -78,10 +79,10 @@ ipcRenderer.on("ub:fail", () => {
   document.getElementById("ubStatus").innerHTML = "Fail";
 })
 
-ipcRenderer.on("ub:note", (event, msg) => {
-  console.log(msg);
-  document.getElementById("ubNote").innerHTML = msg;
-})
+// ipcRenderer.on("ub:note", (event, msg) => {
+//   console.log(msg);
+//   document.getElementById("ubNote").innerHTML = msg;
+// })
 
 ipcRenderer.on("sudo:pass", () => {
   document.getElementById("sudonpStatus").innerHTML = "Pass";

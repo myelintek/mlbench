@@ -121,6 +121,7 @@ function sudonpStatus() {
     mainWindow.webContents.send("sudo:fail")
   }
 }
+
 function checkDocker() {
   try {
     // let res = execSync("wsl service docker status");
@@ -129,6 +130,7 @@ function checkDocker() {
     if (so.includes('running')) {
       mainWindow.webContents.send("docker:pass");
       res = execSync("wsl dockerd --version");
+      console.log(res)
       so = res.toString('utf8').replace(/\0/g, '');
       mainWindow.webContents.send("docker:note", so);
     }
