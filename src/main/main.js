@@ -312,7 +312,18 @@ function list_supported_systems(){
     // console.log("Target container: "+ CONTAINER_NAME);
     let res1 = execSync('wsl bash -c "docker exec '+CONTAINER_NAME+' python print_supported_systems.py"');
     let supported_systems = res1.toString('utf8').replace(/\0/g, '');
-    console.log(supported_systems)
+  
+    // Split the original string line by line, result is an array of string lines
+    let line_split = supported_systems.split('\n');
+
+    //Further split every line string, result is a 2d array
+    let systems_array = []
+    for (let index = 0; index < line_split.length-1; index++) {
+      // console.log(line_split[index])
+      systems_array.push(line_split[index].split(';'));
+    }
+    // Need to send systems_array and the result of supported gpu or not
+    // console.log(systems_array[0][0])
     if (supported_systems.includes(gpu_name)){
       console.log("Current system "+ gpu_name+" is supported!");
     } else{
