@@ -10,6 +10,12 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 // const shell = require("./exec.js").shell
 const mlperfImage = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
 
+const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
+
+const CONTAINER_NAME = "mlbenchmarks"
+
+var hostname
+
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
 
@@ -143,7 +149,8 @@ function checkDocker() {
 
 function setupEnv() {
   try {
-    execSync("wsl mkdir -p /mnt/c/mlperf /mnt/c/mlperf/data /mnt/c/mlperf/models /mnt/c/mlperf/preprocessed_data")
+    execSync("wsl mkdir -p "+MLPERF_SCRATCH_PATH+" "+MLPERF_SCRATCH_PATH+"/data "+MLPERF_SCRATCH_PATH+"/models "+MLPERF_SCRATCH_PATH+"/preprocessed_data")
+    execSync("wsl export MLPERF_SCRATCH_PATH="+MLPERF_SCRATCH_PATH);
     mainWindow.webContents.send("env:pass");
   } catch (err) {
     let msg = err.output.toString()
@@ -154,17 +161,19 @@ function setupEnv() {
 function imgPull() {
   try {
     console.log('Hi')
-    let pullprocess = exec("wsl sudo docker pull cr.myelintek.com/mlcommon/mlperf-inference:x86_64")
+    let pullprocess = exec("wsl sudo docker pull " + mlperfImage)
     pullprocess.stdout.on('data', function (data) {
       console.log(data);
       mainWindow.webContents.send("docker:pullMsg", data);
+      mainWindow.webContents.send("docker:imgReady");
     })
     // pullprocess.stderr.on('data', function (data) {
     //   console.log(data)
     // })
   } catch (err) {
-    // let msg = err.output.toString()
+    let msg = err.output.toString()
     console.log(err)
+    mainWindow.webContents.send("docker:pullMsg", msg);
     // mainWindow.webContents.send("env:fail", msg);
   }
 }
@@ -197,15 +206,121 @@ function checkImage() {
   }
 }
 
-function imgRun() {
-  try {
-    execSync("wsl mkdir -p /mnt/c/mlperf /mnt/c/mlperf/data /mnt/c/mlperf/models /mnt/c/mlperf/preprocessed_data")
-    mainWindow.webContents.send("env:pass");
-  } catch (err) {
+
+function echoContainer(){
+// Make sure that the container is up and running by sending an echo command inside the container
+  try{
+    let res1 = execSync('wsl bash -c "docker exec mlperf-inference-mlsteam-x86_64 echo \"Hello_world\" " ');
+    let so1 = res1.toString('utf8').replace(/\0/g, '');
+    if  (so1.includes("Hello_world")) {
+      mainWindow.webContents.send("docker:run_pass");
+    } else{
+      console.log(so1)
+      mainWindow.webContents.send("docker:run_fail");
+    }
+  } catch (err){
     let msg = err.output.toString()
-    mainWindow.webContents.send("env:fail", msg);
+    console.log(msg)
   }
 }
+
+function runDocker() {
+
+  try{
+    // execSync("wsl export MLPERF_SCRATCH_PATH="+MLPERF_SCRATCH_PATH);
+
+    // hostname = execSync("wsl hostname").toString('utf8').replace(/\0/g, '');
+    // execSync("wsl nvidia-docker run --rm -di -w /work \
+    // -v /home/mlsteam/inference_results_v1.1/closed/MyelinTek:/work -v /home/mlsteam:/mnt//home/mlsteam \
+    // --cap-add SYS_ADMIN --cap-add SYS_TIME \
+    // -e NVIDIA_VISIBLE_DEVICES=all \
+    // --shm-size=32gb \
+    // -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro \
+    // --security-opt apparmor=unconfined --security-opt seccomp=unconfined \
+    // --name "+CONTAINER_NAME+" -h "+CONTAINER_NAME+" --add-host "+CONTAINER_NAME+":127.0.0.1 \
+    // --user 1000:1000 --net host --device /dev/fuse \
+    // -v $(MLPERF_SCRATCH_PATH):$(MLPERF_SCRATCH_PATH)  \
+    // -e MLPERF_SCRATCH_PATH=$(MLPERF_SCRATCH_PATH) \
+    // -e HOST_HOSTNAME="+  hostname+ " "+mlperfImage);
+
+    // Need to check if we already have a container running
+    let res1 = execSync('wsl bash -c "docker ps" ');
+    let so1 = res1.toString('utf8').replace(/\0/g, '');
+    if (so1.includes("mlperf-inference-mlsteam-x86_64")){
+      console.log("Container already running! Don't need to build")
+    } else{
+      // Probably don't need to build the image if we have already pulled it, should be the same image, just need to map the paths correctly using prebuild
+      try{
+        execSync("wsl export NO_BUILD=1");
+        let res1 = execSync('wsl bash -c "cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
+        let so1 = res1.toString('utf8').replace(/\0/g, '');
+        
+      } catch (err){
+        let msg = err.output.toString()
+        console.log(msg)
+      }
+    }
+    echoContainer()
+  } catch (err) {
+    let msg = err.output.toString()
+    console.log(msg)
+  }
+}
+
+function imgRun() {
+  try {
+    // Clone the repo
+    let res = execSync("wsl git clone https://github.com/myelintek/inference_results_v1.1 --branch wsl --single-branch");
+    let so = res.toString('utf8').replace(/\0/g, '');
+    console.log(so);
+
+    runDocker()
+
+  } catch (err) {
+    let msg = err.output.toString()
+    if  (msg.includes("exists")){
+      // Still pass if folder's already there
+      try{
+        runDocker()
+
+      } catch (err2) {
+        let msg = err2.output.toString();
+        console.log(msg)
+        mainWindow.webContents.send("docker:run_fail", msg);
+      }
+      
+    }
+    else{
+      mainWindow.webContents.send("docker:run_fail", msg);
+    }
+  }
+}
+
+
+function list_supported_systems(){
+  try{
+    // Get gpu name from nvidia-smi
+    let res = execSync('wsl bash -c "nvidia-smi --query-gpu=gpu_name --format=csv | sed 1d "');
+    let gpu_name_raw = res.toString('utf8').replace(/\0/g, '');
+    let gpu_name_raw_1 = gpu_name_raw.toString('utf8').replace(/\n/g, '');
+    let gpu_name = gpu_name_raw_1.replace('NVIDIA ', '');
+    console.log(gpu_name)
+    // Send a command to execute a python script inside our running docker container
+    let res1 = execSync('wsl bash -c "docker exec mlperf-inference-mlsteam-x86_64 python print_supported_systems.py"');
+    let supported_systems = res1.toString('utf8').replace(/\0/g, '');
+    console.log(supported_systems)
+    if (supported_systems.includes(gpu_name)){
+      console.log("Current system "+ gpu_name+" is supported!");
+    } else{
+      console.log("Current system "+ gpu_name+" is not supported, need to add manually");
+    }
+  }catch (err){
+    let msg = err.output.toString();
+    console.log(msg)
+  }
+  
+}
+
 
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
@@ -228,4 +343,5 @@ ipcMain.on('docker:pull', () => {
 
 ipcMain.on('docker:run', () => {
   imgRun();
+  list_supported_systems();
 })
