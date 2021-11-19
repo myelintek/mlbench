@@ -136,6 +136,7 @@ function checkDocker() {
     if (so.includes('running')) {
       mainWindow.webContents.send("docker:pass");
       res = execSync("wsl dockerd --version");
+      console.log(res)
       so = res.toString('utf8').replace(/\0/g, '');
       mainWindow.webContents.send("docker:note", so);
     }
