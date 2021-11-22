@@ -319,16 +319,24 @@ function list_supported_systems(){
     //Further split every line string, result is a 2d array
     let msg = []
     for (let index = 0; index < line_split.length-1; index++) {
-      // console.log(line_split[index])
-      msg.push(line_split[index].split(';'));
+      let temp = []
+      let temp_split = line_split[index].split('+');
+      for (let j = 0; j < temp_split.length; j++){
+        temp.push(temp_split[j]);
+      }
+      msg.push(temp);
     }
     // Need to send systems_array and the result of supported gpu or not
     // console.log(systems_array[0][0])
     mainWindow.webContents.send("gpu:supported_systems", msg);
     if (supported_systems.includes(gpu_name)){
-      console.log("Current system "+ gpu_name+" is supported!");
+      let supp_msg = "Current system " + gpu_name + " is supported!"
+      // console.log("Current system "+ gpu_name+" is supported!");
+      mainWindow.webContents.send("gpu:is_supported", supp_msg);
     } else{
-      console.log("Current system "+ gpu_name+" is not supported, need to add manually");
+      let supp_msg = "Current system " + gpu_name + " is not supported, need to add manually"
+      // console.log("Current system "+ gpu_name+" is not supported, need to add manually");
+      mainWindow.webContents.send("gpu:is_supported", supp_msg);
     }
   }catch (err){
     let msg = err.output.toString();

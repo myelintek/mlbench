@@ -166,17 +166,27 @@ document.getElementById('gpuCheck').addEventListener('click', (event) => {
 });
 
 ipcRenderer.on("gpu:supported_systems", (event, msg) => {
-  console.log(msg);
-//   var html = "<table>";
-// for (var i = 0; i < msg.length; i++) {
-//   html += "<tr>";
-//   for (var j = 0; j < msg[i].length; j++) {
-//     html += "<td>" + grade[i][j] + "</td>";
-//   }
-//   html += "</tr>";
-// }
-// html += "</table>";
+  // console.log(msg);
+  var tblBody = document.createElement("tbody");
+  for (var i = 0; i < msg.length; i++) {
+    var row = document.createElement("tr");
+    for (var j = 0; j < msg[i].length; j++) {
+      var cell = document.createElement("td");
+      var cellText = document.createTextNode(msg[i][j]);
+      cell.appendChild(cellText);
+      row.appendChild(cell);            
+    }
+    tblBody.appendChild(row);
+}
+document.getElementById("gpuTable").append(tblBody)
 })
+
+ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
+  // console.log(supp_msg);
+  document.getElementById("gpuStatus").innerHTML = supp_msg;
+})
+
+
 
 var ctx = document.getElementById('chart').getContext('2d');
 var chart = new Chart(ctx, {

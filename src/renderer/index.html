@@ -140,9 +140,7 @@
       <div id="check-gpu" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-gpu-trigger">
         <div class="p-3">
           <button id="gpuCheck" type="button" class="btn btn-primary">Check</button>
-          <p>TODO check system GPU in the support list</p>
-          <p>Supported system list in code/common/system_list.py</p>
-          <table class="table">
+          <table id="gpuTable" class="table">
             <thead>
               <tr>
                 <th>Nvidia-smi Name</th>
@@ -151,61 +149,8 @@
                 <th>GPU counts</th>
               </tr>  
             </thead>
-            <tr>
-              <td>A100-PCIE-40GB</td>
-              <td>["20F1", "20BF"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1, 2, 8]</td>
-            </tr>
-            <tr>
-              <td>A100-PCIE-80GB</td>
-              <td>["20B5"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1, 2, 8]</td>
-            </tr>
-            <tr>
-              <td>A100-SXM4-40GB</td>
-              <td>["20B0"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1, 8]</td>
-            </tr>
-            <tr>
-              <td>A100-SXM-80GB</td>
-              <td>["20B2"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1, 4, 8]</td>
-            </tr>
-            <tr>
-              <td>GeForce RTX 3080</td>
-              <td>["2206"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1]</td>
-            </tr>
-            <tr>
-              <td>["GeForce RTX 3090", "Quadro RTX A6000", "RTX A6000"]</td>
-              <td>["2204", "2230"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1]</td>
-            </tr>
-            <tr>
-              <td>"A10"</td>
-              <td>["2236"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1, 8]</td>
-            </tr>
-            <tr>
-              <td>["Tesla T4", "T4 32GB"]</td>
-              <td>["1EB8", "1EB9"]</td>
-              <td>Architecture.Turing</td>
-              <td>[1, 8, 20]</td>
-            </tr>
-            <tr>
-              <td>["A30"]</td>
-              <td>["20B7"]</td>
-              <td>Architecture.Ampere</td>
-              <td>[1, 8]</td>
-            </tr>
-          </table>  
+          </table>
+          <label id="gpuStatus"></label>
         </div>
         <hr>
         <button id="prevButton1">Previous</button>
