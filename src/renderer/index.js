@@ -160,6 +160,24 @@ ipcRenderer.on("docker:run_fail", () => {
   document.getElementById("imgRunStatus").innerHTML = "Failed";
 })
 
+document.getElementById('gpuCheck').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('gpu:check');
+});
+
+ipcRenderer.on("gpu:supported_systems", (event, msg) => {
+  console.log(msg);
+//   var html = "<table>";
+// for (var i = 0; i < msg.length; i++) {
+//   html += "<tr>";
+//   for (var j = 0; j < msg[i].length; j++) {
+//     html += "<td>" + grade[i][j] + "</td>";
+//   }
+//   html += "</tr>";
+// }
+// html += "</table>";
+})
+
 var ctx = document.getElementById('chart').getContext('2d');
 var chart = new Chart(ctx, {
   type: 'bar',

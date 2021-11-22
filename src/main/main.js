@@ -311,9 +311,10 @@ function list_supported_systems(){
     // Send a command to execute a python script inside our running docker container
     // console.log("Target container: "+ CONTAINER_NAME);
     let res1 = execSync('wsl bash -c "docker exec '+CONTAINER_NAME+' python print_supported_systems.py"');
-    let supported_systems = res1.toString('utf8').replace(/\0/g, '');
-    console.log(supported_systems)
-    if (supported_systems.includes(gpu_name)){
+    let msg = res1.toString('utf8').replace(/\0/g, '');
+    // console.log(msg)
+    mainWindow.webContents.send("gpu:supported_systems", msg);
+    if (msg.includes(gpu_name)){
       console.log("Current system "+ gpu_name+" is supported!");
     } else{
       console.log("Current system "+ gpu_name+" is not supported, need to add manually");
@@ -347,5 +348,8 @@ ipcMain.on('docker:pull', () => {
 
 ipcMain.on('docker:run', () => {
   imgRun();
+})
+
+ipcMain.on('gpu:check', () => {
   list_supported_systems();
 })
