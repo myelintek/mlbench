@@ -3,7 +3,9 @@ const { ipcRenderer } = require('electron');
 const Stepper = require('bs-stepper');
 const Chart = require('chart.js');
 
-var stepper1 = new Stepper(document.querySelector('#stepper1'))
+var stepper1 = new Stepper(document.querySelector('#stepper1'), {
+  linear: false
+})
 
 document.getElementById('nextButton').addEventListener('click', (event) => {
     stepper1.next();
