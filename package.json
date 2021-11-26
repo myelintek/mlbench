@@ -16,6 +16,7 @@
     }
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4",
     "bs-stepper": "^1.7.0",
     "chart.js": "^3.6.0",
     "electron-tabs": "^0.15.0",
