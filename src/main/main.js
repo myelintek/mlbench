@@ -12,10 +12,13 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 const MLPERF_IMAGE = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
 const CONTAINER_NAME = "mlperf-inference-x86_64"
 const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
-
+const MODEL_NAMES = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"]
 // const CONTAINER_NAME = "mlbenchmarks"
 
-var hostname
+const EventEmitter = require('events');
+class MyEmitter extends EventEmitter {}
+
+const myEmitter = new MyEmitter();
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
@@ -346,8 +349,161 @@ function list_supported_systems(){
 }
 
 
+function check_scratch_path(){
+  // Sanity check if scratch path is there
+  //command = ' [ -d "/mnt/c/mlcommon/" ] && echo "exists" || echo "not found" '
+  let res1 = execSync('wsl bash check_dir_script.sh');
+  let msg = res1.toString('utf8').replace(/\0/g, '');
+  console.log(msg)
+  if (msg.includes("Exists")){
+    console.log("Scratch path ready!")
+  } else {
+    // console.log("Need to setup scratch path first!")
+    // ToDo: play around with throwing errors in subfunctions
+    throw new Error('Need to setup scratch path first!');
+  }
+}
+
+function check_model_folders(model_directory_names){
+  //Check if specific benchmark directories exist
+  let model_readiness = []
+  model_readiness.length = model_directory_names.length;
+  model_readiness.fill(0);
+
+  for (let i=0; i<model_directory_names.length; i++){
+    let res = execSync('wsl bash check_dir_script.sh models/'+model_directory_names[i]);
+    let msg = res.toString('utf8').replace(/\0/g, '');
+    console.log(msg)
+    if (msg.includes("Exists")){
+      console.log("Benchmark "+model_directory_names[i]+ " folder exists!")
+      model_readiness[i]=1;
+    } else {
+      console.log("Benchmark "+model_directory_names[i]+ " not ready!")
+    }
+  }
+  console.log(String(model_readiness));
+
+  return model_readiness 
+
+}
+
+
+function check_models(){
+  try {
+    //Check directories on page change
+    // let model_directory_names = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"];
+    // let model_directory_names = ["SSDMobileNet"];
+    let model_directory_names = MODEL_NAMES;
+    
+    check_scratch_path();
+    
+    let model_readiness = check_model_folders(model_directory_names);
+
+    // ToDo:Send model_readiness result to client
+    console.log("Models ready status: "+String(model_readiness))
+  }catch (err){
+    // let msg = err.output.toString();
+    console.log(err)
+  }
+}
+
+
+function ftp_unzip_models(selected_models){
+  // Run a script to download given models via nas ftp
+  // Run the ftp download script
+
+  // Iterate over selected_models and add model strings where selection is 1
+  let models_to_download=""
+  
+  for (let i=0; i<selected_models.length; i++){
+    if (selected_models[i] == 1) {
+      // Compose ftp download string
+      models_to_download = models_to_download + MODEL_NAMES[i] + ".zip ";
+    }
+  }
+  //Check if any models need to be downloaded
+  if (models_to_download == ""){
+    console.log("No models selected, do nothing")
+    return 1;
+  }
+  // exec does not block the program! Should do the same for other long operations
+  let ftpprocess = exec('wsl bash myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/models/ /data/mlcommon/models '+models_to_download);
+  ftpprocess.stdout.on('data', function (data) {
+    console.log(data);
+    // mainWindow.webContents.send("docker:pullMsg", data);
+    // mainWindow.webContents.send("docker:imgReady");
+  })
+  // After ftp finishes, try to unzip model files
+  ftpprocess.on('exit', (code) => {
+    
+    console.log(code);
+    if (code == 0){
+      // Not sure this exit code really indicates ftp download success, most likely just that ftp didn't crash
+      // ToDo: Maybe need to check success in some other way
+      // console.log("FTP download models finished correctly!");
+      console.log("FTP process exited correctly! But did it download your files???(\/)o_o(\/)");
+      // After the ftp download process finishes, should unzip files
+      //unzip /mnt/c/mlcommon/models/SSDMobileNet.zip -d /mnt/c/mlcommon/models/
+      //Unzip every models 1 by 1
+      // let unzip_command_base = 'unzip '+MLPERF_SCRATCH_PATH+ '/models/'
+      let subprocesses = []
+      for (let i=0;i<selected_models.length; i++){
+        if (selected_models[i] == 1) {
+          // Compose unzip command string
+          let unzip_command =  "unzip -o "+MLPERF_SCRATCH_PATH+ "/models/"+MODEL_NAMES[i] + ".zip -d "+ MLPERF_SCRATCH_PATH+ '/models/"';
+          // Can we spawn multiple subprocesses to unzip concurrently?
+          // Or do we need to use the same subprocess to launch commands?
+
+          // Try multiple subprocesses
+          let unzip_process = exec('wsl bash -c "' + unzip_command);
+          subprocesses.push(unzip_process)
+          unzip_process.stdout.on('data', function (data) {
+            console.log(data);
+
+          });
+          unzip_process.on('exit', (code) => {
+            subprocesses.pop()
+            if (subprocesses.length == 0){
+              // Emitt an event that indicates finishing all unzipping
+              myEmitter.emit('event', 0);
+            }
+          })
+        }
+      }
+    }
+  });
+  return 0;
+  // How to catch ftp error? try catch in here?
+}
+
+
+function download_models(selected_models){
+  try{
+    // Download models that are selected
+  
+    ftp_unzip_models(selected_models);
+  
+    myEmitter.on('event', function(code) {
+      if (code == 0){
+        let model_readiness = check_model_folders(MODEL_NAMES);
+        console.log("Models ready status: "+String(model_readiness))
+        //Send model status to client
+      }
+    })
+    
+    
+  } catch(err){
+    let msg = err.output.toString();
+    console.log(msg)
+  }
+  
+}
+
+
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
+  // check_models();
+  // download_models([1,1,0,0]);
   checkWSL();
   checkUbuntu();
   sudonpStatus();
