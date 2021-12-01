@@ -1,8 +1,8 @@
 #!/bin/bash
 
 HOST="nas.myelintek.net"
-USER="sergiy"
-PASSWORD="qweasd"
+USER="anonymous"
+PASSWORD="anonymous"
 
 TARGET=$1
 SOURCE=$2
