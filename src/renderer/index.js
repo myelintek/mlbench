@@ -188,7 +188,49 @@ ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
   document.getElementById("gpuStatus").innerHTML = supp_msg;
 })
 
+document.getElementById('extend1').addEventListener('click', (event) => {
+  var x = document.getElementById("scenario1");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+    document.getElementById('fa1').classList.toggle("fa-minus");
+  } else {
+    x.style.display = "none";
+    document.getElementById('fa1').classList.toggle("fa-plus");
+  }
+});
 
+document.getElementById('extend2').addEventListener('click', (event) => {
+  var x = document.getElementById("scenario2");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+    document.getElementById('fa2').classList.toggle("fa-minus");
+  } else {
+    x.style.display = "none";
+    document.getElementById('fa2').classList.toggle("fa-plus");
+  }
+});
+
+document.getElementById('extend3').addEventListener('click', (event) => {
+  var x = document.getElementById("scenario3");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+    document.getElementById('fa3').classList.toggle("fa-minus");
+  } else {
+    x.style.display = "none";
+    document.getElementById('fa3').classList.toggle("fa-plus");
+  }
+});
+
+document.getElementById('extend4').addEventListener('click', (event) => {
+  var x = document.getElementById("scenario4");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+    document.getElementById('fa4').classList.toggle("fa-minus");
+  } else {
+    x.style.display = "none";
+    document.getElementById('fa4').classList.toggle("fa-plus");
+  }
+});
 
 var ctx = document.getElementById('chart').getContext('2d');
 var chart = new Chart(ctx, {
