@@ -13,6 +13,7 @@ const MLPERF_IMAGE = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
 const CONTAINER_NAME = "mlperf-inference-x86_64"
 const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
 const MODEL_NAMES = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"]
+const DATASET_NAMES = ["coco", "imagenet", "squad_tokenized"]
 // const CONTAINER_NAME = "mlbenchmarks"
 
 const EventEmitter = require('events');
@@ -364,43 +365,54 @@ function check_scratch_path(){
   }
 }
 
-function check_model_folders(model_directory_names){
-  //Check if specific benchmark directories exist
-  let model_readiness = []
-  model_readiness.length = model_directory_names.length;
-  model_readiness.fill(0);
 
-  for (let i=0; i<model_directory_names.length; i++){
-    let res = execSync('wsl bash check_dir_script.sh models/'+model_directory_names[i]);
+function check_folders(path_prefix, directory_names){
+  //Check if specific benchmark directories exist
+  let readiness = []
+  readiness.length = directory_names.length;
+  readiness.fill(0);
+
+  for (let i=0; i<directory_names.length; i++){
+    let res = execSync('wsl bash check_dir_script.sh ' +path_prefix+'/'+directory_names[i]);
     let msg = res.toString('utf8').replace(/\0/g, '');
     console.log(msg)
     if (msg.includes("Exists")){
-      console.log("Benchmark "+model_directory_names[i]+ " folder exists!")
-      model_readiness[i]=1;
+      console.log("Benchmark "+directory_names[i]+ " "+ path_prefix+ " folder exists!")
+      readiness[i]=1;
     } else {
-      console.log("Benchmark "+model_directory_names[i]+ " not ready!")
+      console.log("Benchmark "+directory_names[i]+ " "+ path_prefix+ " not ready!")
     }
   }
-  console.log(String(model_readiness));
+  console.log(String(readiness));
 
-  return model_readiness 
-
+  return readiness 
 }
 
 
-function check_models(){
+function check_structure(control_string){
   try {
+    let directory_names = "";
+    let path_prefix = "";
+    if (control_string == "models"){
+      directory_names = MODEL_NAMES;
+      path_prefix = "models";
+    } else if (control_string == "datasets"){
+      directory_names = DATASET_NAMES;
+      path_prefix = "preprocessed_data";
+    } else {
+      throw new Error('Unnknown control string');
+    }
     //Check directories on page change
     // let model_directory_names = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"];
     // let model_directory_names = ["SSDMobileNet"];
-    let model_directory_names = MODEL_NAMES;
+    // let data_directory_names = DATASET_NAMES;
     
     check_scratch_path();
     
-    let model_readiness = check_model_folders(model_directory_names);
+    let readiness = check_folders(path_prefix, directory_names);
 
     // ToDo:Send model_readiness result to client
-    console.log("Models ready status: "+String(model_readiness))
+    console.log(control_string+" ready status: "+String(readiness))
   }catch (err){
     // let msg = err.output.toString();
     console.log(err)
@@ -408,32 +420,33 @@ function check_models(){
 }
 
 
-function ftp_unzip_models(selected_models){
-  // Run a script to download given models via nas ftp
+function ftp_unzip(path_prefix, directory_names,selected_data){
+  // Run a script to download given data via nas ftp
   // Run the ftp download script
 
-  // Iterate over selected_models and add model strings where selection is 1
-  let models_to_download=""
+
+  // Iterate over selected_data and add model strings where selection is 1
+  let archives_to_download=""
   
-  for (let i=0; i<selected_models.length; i++){
-    if (selected_models[i] == 1) {
+  for (let i=0; i<selected_data.length; i++){
+    if (selected_data[i] == 1) {
       // Compose ftp download string
-      models_to_download = models_to_download + MODEL_NAMES[i] + ".zip ";
+      archives_to_download = archives_to_download + directory_names[i] + ".zip ";
     }
   }
-  //Check if any models need to be downloaded
-  if (models_to_download == ""){
-    console.log("No models selected, do nothing")
+  //Check if any data need to be downloaded
+  if (archives_to_download == ""){
+    console.log("No data selected, do nothing")
     return 1;
   }
   // exec does not block the program! Should do the same for other long operations
-  let ftpprocess = exec('wsl bash myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/models/ /data/mlcommon/models '+models_to_download);
+  let ftpprocess = exec('wsl bash myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/ /data/mlcommon/'+path_prefix+' '+archives_to_download);
   ftpprocess.stdout.on('data', function (data) {
     console.log(data);
     // mainWindow.webContents.send("docker:pullMsg", data);
     // mainWindow.webContents.send("docker:imgReady");
   })
-  // After ftp finishes, try to unzip model files
+  // After ftp finishes, try to unzip data files
   ftpprocess.on('exit', (code) => {
     
     console.log(code);
@@ -444,13 +457,13 @@ function ftp_unzip_models(selected_models){
       console.log("FTP process exited correctly! But did it download your files???(\/)o_o(\/)");
       // After the ftp download process finishes, should unzip files
       //unzip /mnt/c/mlcommon/models/SSDMobileNet.zip -d /mnt/c/mlcommon/models/
-      //Unzip every models 1 by 1
+      //Unzip all data archives 1 by 1
       // let unzip_command_base = 'unzip '+MLPERF_SCRATCH_PATH+ '/models/'
       let subprocesses = []
-      for (let i=0;i<selected_models.length; i++){
-        if (selected_models[i] == 1) {
+      for (let i=0;i<selected_data.length; i++){
+        if (selected_data[i] == 1) {
           // Compose unzip command string
-          let unzip_command =  "unzip -o "+MLPERF_SCRATCH_PATH+ "/models/"+MODEL_NAMES[i] + ".zip -d "+ MLPERF_SCRATCH_PATH+ '/models/"';
+          let unzip_command =  "unzip -o "+MLPERF_SCRATCH_PATH+ "/"+path_prefix+"/"+directory_names[i] + ".zip -d "+ MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/"';
           // Can we spawn multiple subprocesses to unzip concurrently?
           // Or do we need to use the same subprocess to launch commands?
 
@@ -477,24 +490,36 @@ function ftp_unzip_models(selected_models){
 }
 
 
-function download_models(selected_models){
+
+function update_data(control_string, selected_data){
   try{
     // Download models that are selected
-  
-    ftp_unzip_models(selected_models);
+    let directory_names ="";
+    let path_prefix = "";
+    if (control_string == "models"){
+      directory_names = MODEL_NAMES;
+      path_prefix = "models";
+    } else if (control_string == "datasets"){
+      directory_names = DATASET_NAMES;
+      path_prefix = "preprocessed_data";
+    } else {
+      throw new Error('Unnknown control string');
+    }
+
+    ftp_unzip(path_prefix, directory_names, selected_data);
   
     myEmitter.on('event', function(code) {
       if (code == 0){
-        let model_readiness = check_model_folders(MODEL_NAMES);
-        console.log("Models ready status: "+String(model_readiness))
+        let readiness = check_folders(path_prefix, directory_names);
+        console.log(control_string+" ready status: "+String(readiness))
         //Send model status to client
       }
     })
     
     
   } catch(err){
-    let msg = err.output.toString();
-    console.log(msg)
+    // let msg = err.output.toString();
+    console.log(err)
   }
   
 }
@@ -502,8 +527,8 @@ function download_models(selected_models){
 
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
-  // check_models();
-  // download_models([1,1,0,0]);
+  // check_structure("data");
+  // update_data("datasets", [0,0,1]);
   checkWSL();
   checkUbuntu();
   sudonpStatus();
