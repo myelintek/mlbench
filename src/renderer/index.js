@@ -188,6 +188,11 @@ ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
   document.getElementById("gpuStatus").innerHTML = supp_msg;
 })
 
+document.getElementById('scenarioCheck').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('scenario:check');
+});
+
 document.getElementById('extend1').addEventListener('click', (event) => {
   var x = document.getElementById("scenario1");
   if (x.style.display === "none") {

@@ -299,6 +299,34 @@ function imgRun() {
   }
 }
 
+function list_configs(){
+  try{
+    let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
+
+    let configs = res1.toString('utf8').replace(/\0/g, '');
+    console.log(configs);
+    // Split the original string line by line, result is an array of string lines
+    // let line_split = configs.split('\n');
+
+    // //Further split every line string, result is a 2d array
+    // let msg = []
+    // for (let index = 0; index < line_split.length-1; index++) {
+    //   let temp = []
+    //   let temp_split = line_split[index].split('+');
+    //   for (let j = 0; j < temp_split.length; j++){
+    //     temp.push(temp_split[j]);
+    //   }
+    //   msg.push(temp);
+    // }
+    // // Need to send systems_array and the result of supported gpu or not
+    // // console.log(systems_array[0][0])
+    // mainWindow.webContents.send("gpu:supported_systems", msg);
+  }catch (err){
+    let msg = err.output.toString();
+    console.log(msg)
+  }
+  
+}
 
 function list_supported_systems(){
   try{
@@ -310,7 +338,7 @@ function list_supported_systems(){
     console.log(gpu_name)
     // Send a command to execute a python script inside our running docker container
     // console.log("Target container: "+ CONTAINER_NAME);
-    let res1 = execSync('wsl bash -c "docker exec '+CONTAINER_NAME+' python print_supported_systems.py"');
+    let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME +' python print_supported_systems.py"');
 
     let supported_systems = res1.toString('utf8').replace(/\0/g, '');
     // Split the original string line by line, result is an array of string lines
@@ -371,4 +399,8 @@ ipcMain.on('docker:run', () => {
 
 ipcMain.on('gpu:check', () => {
   list_supported_systems();
+})
+
+ipcMain.on('scenario:check', () => {
+  list_configs();
 })
