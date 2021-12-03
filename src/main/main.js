@@ -14,6 +14,7 @@ const CONTAINER_NAME = "mlperf-inference-x86_64"
 const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
 const MODEL_NAMES = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"]
 const DATASET_NAMES = ["coco", "imagenet", "squad_tokenized"]
+
 // const CONTAINER_NAME = "mlbenchmarks"
 
 const EventEmitter = require('events');
@@ -430,7 +431,7 @@ function check_structure(control_string){
       directory_names = DATASET_NAMES;
       path_prefix = "preprocessed_data";
     } else {
-      throw new Error('Unnknown control string');
+      throw new Error('Unknown control string');
     }
     //Check directories on page change
     // let model_directory_names = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"];
@@ -443,6 +444,8 @@ function check_structure(control_string){
 
     // ToDo:Send model_readiness result to client
     console.log(control_string+" ready status: "+String(readiness))
+    return readiness
+    
   }catch (err){
     // let msg = err.output.toString();
     console.log(err)
@@ -543,6 +546,13 @@ function update_data(control_string, selected_data){
         let readiness = check_folders(path_prefix, directory_names);
         console.log(control_string+" ready status: "+String(readiness))
         //Send model status to client
+        if (control_string == "models"){
+          mainWindow.webContents.send("download:models_status", readiness);
+        } else if (control_string == "datasets"){
+          mainWindow.webContents.send("download:datasets_status", readiness);
+        } else {
+          throw new Error('Unsupported control string '+control_string);
+        }
       }
     })
     
@@ -588,10 +598,22 @@ ipcMain.on('scenario:check', () => {
   list_configs();
 })
 
+ipcMain.on('download:check', () => {
+  
+  let model_readiness = check_structure("models");
+  let dataset_readiness = check_structure("datasets");
+
+  mainWindow.webContents.send("download:models_status", model_readiness);
+  mainWindow.webContents.send("download:datasets_status", dataset_readiness);
+
+})
+
 ipcMain.on('download:models', (e, args) => {
   console.log(args);
+  update_data("models", args)
 })
 
 ipcMain.on('download:datasets', (e, args) => {
   console.log(args);
+  update_data("datasets", args)
 })
