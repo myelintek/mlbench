@@ -31,8 +31,10 @@ document.getElementById('prevButton2').addEventListener('click', (event) => {
   stepper1.previous();
 });
 
+// next Download
 document.getElementById('nextButton3').addEventListener('click', (event) => {
   stepper1.next();
+  // ipcRenderer.send('download:check');
 });
 
 document.getElementById('prevButton3').addEventListener('click', (event) => {
@@ -43,6 +45,7 @@ document.getElementById('nextButton4').addEventListener('click', (event) => {
   stepper1.next();
 });
 
+// prev Download
 document.getElementById('prevButton4').addEventListener('click', (event) => {
   stepper1.previous();
 });
