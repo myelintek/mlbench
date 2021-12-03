@@ -14,6 +14,7 @@ const CONTAINER_NAME = "mlperf-inference-x86_64"
 const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
 const MODEL_NAMES = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"]
 const DATASET_NAMES = ["coco", "imagenet", "squad_tokenized"]
+const VALID_BENCHMARKS = ["ssd-mobilenet", "ssd-resnet34", "resnet50", "bert"]
 
 // const CONTAINER_NAME = "mlbenchmarks"
 
@@ -22,6 +23,8 @@ class MyEmitter extends EventEmitter {}
 
 const myEmitter = new MyEmitter();
 
+
+const fs = require('fs')
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
 
@@ -304,14 +307,27 @@ function imgRun() {
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 function list_configs(){
   try{
     let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
 
-    let configs = res1.toString('utf8').replace(/\0/g, '');
-    let json_parse = JSON.parse(configs);
+    let configs = res1.toString('utf8').replace(/\0/g, '').split('\n');
     console.log(configs);
-    mainWindow.webContents.send("scenario:supported_configs", configs);
+    let config_array = [];
+    for (let i=0; i<configs.length-1; i++){
+      // configs[i][-3] = " ";
+      // console.log(configs[i]);
+      let json_format = JSON.parse(configs[i])
+      // console.log(json_format);
+      config_array.push(json_format);
+    }
+
+    // console.log(config_array);
+
+    // let json_format = JSON.parse(configs)
+    // console.log(json_format);
     // Split the original string line by line, result is an array of string lines
     // let line_split = configs.split('\n');
 
@@ -335,6 +351,8 @@ function list_configs(){
   
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 function list_supported_systems(){
   try{
     // Get gpu name from nvidia-smi
@@ -381,6 +399,8 @@ function list_supported_systems(){
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Functions to check and download data
 function check_scratch_path(){
   // Sanity check if scratch path is there
   //command = ' [ -d "/mnt/c/mlcommon/" ] && echo "exists" || echo "not found" '
@@ -563,12 +583,113 @@ function update_data(control_string, selected_data){
   }
   
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Functions to get benchmark results
+function get_run_info(results_json){
+  // Parse the folder structure of results/
+  // Save GPU names
+  try{
+    // let path = 'C:/Users/myelintek/mlbench/inference_results_v1.1/closed/Myelintek/build/logs/'
+    let path = './inference_results_v1.1/closed/Myelintek/build/logs/'
+    // let res = fs.readdirSync(path).filter(function (file){
+    // fs.statSync(path+'/'+file).isDirectory()
+    // });
+    let res = fs.readdirSync(path);
+    console.log(res);
+    for (let i=0; i< res.length; i++){
+      results_json = get_result_json(path, res[i], results_json);
+    }
+    
+    // get_available_result_benchmarks(path, res[0]);
+    return results_json
+ 
+  } catch(err){
+    // let msg = err.output.toString();
+    console.log(err);
+  }
+}
+
+
+function get_result_json(path, run_name, results_json){
+  try {
+    let run_path = path+run_name+'/';
+    let res = fs.readdirSync(run_path);
+    // console.log(res);
+    let rawdata = fs.readFileSync(run_path+'perf_harness_summary.json');
+    let performance_results = JSON.parse(rawdata);
+    // console.log(performance_results);
+    // performance_results[0]
+    let keys = Object.keys(performance_results);
+    let benchmarks = [];
+    let result_number = 0;
+    let result_valid = false;
+    let benchmark_name = [];
+    let gpu_param = [];
+    for (let i = 0; i < keys.length; i++){
+      // console.log(performance_results[keys[i]]);
+      gpu_param = keys[i];
+      benchmarks = Object.keys(performance_results[keys[i]]);
+      for (let j = 0; j < benchmarks.length; j++){
+        benchmark_name = [benchmarks[j]];
+        // console.log(performance_results[keys[i]][benchmarks[j]]);
+        let str = performance_results[keys[i]][benchmarks[j]].split(':');
+        str = str[1].split(',');
+        result_number = str[0].replace(' ', '');
+        if (str[1].includes("Result is VALID")){
+          result_valid = true;
+        }
+        // let date_result = {}
+        let date_result = {'gpu':gpu_param, 'result':result_number, 'valid':result_valid}
+        results_json[benchmark_name][run_name] = date_result;
+        // console.log(date_result);
+        // let tmp ={benchmark_name:{run_name:{'gpu':gpu_param, 'result':result_number, 'valid':result_valid}}};
+      }
+    }
+    // console.log(benchmark_name+" "+run_name+" "+gpu_param+" "+result_number+" "+ result_valid);
+    // return benchmark_name, run_name, gpu_param, result_number, result_valid
+    return results_json
+    // return run_name, result_validity, bench_result_number
+
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+
+function parse_results_into_graphs(){
+  try{
+    // VALID_BENCHMARKS
+    let results = {};
+    for (let i=0; i<VALID_BENCHMARKS.length; i++){
+      results[VALID_BENCHMARKS[i]]={};
+    }
+    // Parse results directory in the inference_benchmarks
+    // GPU
+    // Benchmark
+    // Scenario
+    // Results
+    // Numbers
+    results = get_run_info(results)
+    console.log(results)
+
+    // ToDo: Send results to client
+    return results
+  } catch(err){
+    // let msg = err.output.toString();
+    console.log(err)
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
   // check_structure("data");
   // update_data("datasets", [0,0,1]);
+  // get_run_info();
+  // parse_results_into_graphs();
   checkWSL();
   checkUbuntu();
   sudonpStatus();
