@@ -308,7 +308,9 @@ function list_configs(){
     let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
 
     let configs = res1.toString('utf8').replace(/\0/g, '');
+    let json_parse = JSON.parse(configs);
     console.log(configs);
+    mainWindow.webContents.send("scenario:supported_configs", configs);
     // Split the original string line by line, result is an array of string lines
     // let line_split = configs.split('\n');
 

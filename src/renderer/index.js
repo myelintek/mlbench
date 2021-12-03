@@ -193,6 +193,10 @@ document.getElementById('scenarioCheck').addEventListener('click', (event) => {
   ipcRenderer.send('scenario:check');
 });
 
+ipcRenderer.on("scenario:supported_configs", (event, msg) => {
+  console.log(msg);
+})
+
 document.getElementById('extend1').addEventListener('click', (event) => {
   var x = document.getElementById("scenario1");
   if (x.style.display === "none") {
