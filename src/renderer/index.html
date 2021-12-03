@@ -265,32 +265,36 @@
         <h1>Download the Model files</h1>
         <hr>
         <div class="p-3">
-          <p>TODO, download the pretrained model files</p>
-          <p>make download_model BENCHMARKS="resnet50 ssd-resnet34 ssd-mobilenet bert dlrm rnnt 3d-unet"</p>
+          <button id="downloadModels" type="button" class="btn btn-primary">Download Models</button>
           <table class="table">
             <thead>
               <tr>
+                <th></th>
                 <th>Model</th>
                 <th>Status</th>
                 <th>Notes</th>
               </tr>  
             </thead>
             <tr>
+              <td><input type="checkbox" id="resnet50Check"></td>
               <td>resnet50</td>
               <td id="resnet50Status">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/models/ResNet50</td>
             </tr>
             <tr>
+              <td><input type="checkbox" id="resnet34Check"></td>
               <td>ssd-resnet34</td>
               <td id="ssd-resnet34Status">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/models/SSDResNet34</td>
             </tr>
             <tr>
+              <td><input type="checkbox" id="mobilenetCheck"></td>
               <td>ssd-mobilenet</td>
               <td id="ssd-mobilenetStatus">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/models/SSDMobileNet</td>
             </tr>
             <tr>
+              <td><input type="checkbox" id="bertCheck"></td>
               <td>bert</td>
               <td id="bertStatus">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/models/bert</td>
@@ -301,38 +305,35 @@
         <h1>Download the Preprocessed datasets</h1>
         <hr>
         <div class="p-3">
-          <p>TODO download the Preprocessed datasets, output of make preprocess_data</p>
-          <p>make preprocess_data BENCHMARKS="resnet50 ssd-resnet34 ssd-mobilenet bert dlrm rnnt 3d-unet"</p>
+          <button id="downloadDatasets" type="button" class="btn btn-primary">Download Datasets</button>
           <table class="table">
             <thead>
               <tr>
-                <th>Model</th>
+                <th></th>
                 <th>Dataset</th>
+                <th>Models</th>
                 <th>Status</th>
                 <th>Notes</th>
               </tr>  
             </thead>
             <tr>
-              <td>resnet50</td>
+              <td><input type="checkbox" id="imageNetCheck"></td>
               <td>ImageNet 2012 Validation Set</td>
+              <td>resnet50</td>
               <td id="imagenetStatus">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/preprocessed_data/imagenet</td>
             </tr>
             <tr>
-              <td>ssd-resnet34</td>
+              <td><input type="checkbox" id="cocoCheck"></td>
               <td>COCO 2017 Dataset</td>
+              <td>ssd-resnet34, ssd-mobilenet</td>
               <td id="cocoStatus">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
             </tr>
             <tr>
-              <td>ssd-mobilenet</td>
-              <td>COCO 2017 Dataset</td>
-              <td id="cocoStatus">Unknown</td>
-              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
-            </tr>
-            <tr>
-              <td>bert</td>
+              <td><input type="checkbox" id="squadCheck"></td>
               <td>SQuAD v1.1</td>
+              <td>bert</td>
               <td id="squadStatus">Unknown</td>
               <td>$MLPERF_SCRATCH_PATH/preprocessed_data/squad_tokenized</td>
             </tr>

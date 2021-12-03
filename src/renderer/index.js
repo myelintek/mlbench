@@ -237,6 +237,69 @@ document.getElementById('extend4').addEventListener('click', (event) => {
   }
 });
 
+document.getElementById('downloadModels').addEventListener('click', (event) => {
+  event.preventDefault();
+  const models = [0, 0, 0, 0]
+  // Get the checkbox
+  var resnet50CheckBox = document.getElementById("resnet50Check");
+  // If the checkbox is checked, display the output text
+  if (resnet50CheckBox.checked == true){
+    models[2] = 1
+  }
+
+  // Get the checkbox
+  var resnet34CheckBox = document.getElementById("resnet34Check");
+  // If the checkbox is checked, display the output text
+  if (resnet34CheckBox.checked == true){
+    models[1] = 1
+  }
+  
+  // Get the checkbox
+  var mobilenetCheckBox = document.getElementById("mobilenetCheck");
+  // If the checkbox is checked, display the output text
+  if (mobilenetCheckBox.checked == true){
+    models[0] = 1
+  }
+
+  // Get the checkbox
+  var bertCheckBox = document.getElementById("bertCheck");
+  // If the checkbox is checked, display the output text
+  if (bertCheckBox.checked == true){
+    models[3] = 1
+  }
+
+  ipcRenderer.send('download:models', models);
+  
+});
+
+document.getElementById('downloadDatasets').addEventListener('click', (event) => {
+  event.preventDefault();
+  const datasets = [0, 0, 0]
+  // Get the checkbox
+  var cocoCheckBox = document.getElementById("cocoCheck");
+  // If the checkbox is checked, display the output text
+  if (cocoCheckBox.checked == true){
+    datasets[0] = 1
+  }
+
+  // Get the checkbox
+  var imageNetCheckBox = document.getElementById("imageNetCheck");
+  // If the checkbox is checked, display the output text
+  if (imageNetCheckBox.checked == true){
+    datasets[1] = 1
+  }
+  
+  // Get the checkbox
+  var squadCheckBox = document.getElementById("squadCheck");
+  // If the checkbox is checked, display the output text
+  if (squadCheckBox.checked == true){
+    datasets[2] = 1
+  }
+
+  ipcRenderer.send('download:datasets', datasets);
+  
+});
+
 var ctx = document.getElementById('chart').getContext('2d');
 var chart = new Chart(ctx, {
   type: 'bar',

@@ -585,3 +585,11 @@ ipcMain.on('gpu:check', () => {
 ipcMain.on('scenario:check', () => {
   list_configs();
 })
+
+ipcMain.on('download:models', (e, args) => {
+  console.log(args);
+})
+
+ipcMain.on('download:datasets', (e, args) => {
+  console.log(args);
+})
