@@ -12,10 +12,14 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 const MLPERF_IMAGE = "cr.myelintek.com/mlcommon/mlperf-inference:x86_64"
 const CONTAINER_NAME = "mlperf-inference-x86_64"
 const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
-
+const MODEL_NAMES = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"]
+const DATASET_NAMES = ["coco", "imagenet", "squad_tokenized"]
 // const CONTAINER_NAME = "mlbenchmarks"
 
-var hostname
+const EventEmitter = require('events');
+class MyEmitter extends EventEmitter {}
+
+const myEmitter = new MyEmitter();
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
@@ -374,8 +378,185 @@ function list_supported_systems(){
 }
 
 
+function check_scratch_path(){
+  // Sanity check if scratch path is there
+  //command = ' [ -d "/mnt/c/mlcommon/" ] && echo "exists" || echo "not found" '
+  let res1 = execSync('wsl bash check_dir_script.sh');
+  let msg = res1.toString('utf8').replace(/\0/g, '');
+  console.log(msg)
+  if (msg.includes("Exists")){
+    console.log("Scratch path ready!")
+  } else {
+    // console.log("Need to setup scratch path first!")
+    // ToDo: play around with throwing errors in subfunctions
+    throw new Error('Need to setup scratch path first!');
+  }
+}
+
+
+function check_folders(path_prefix, directory_names){
+  //Check if specific benchmark directories exist
+  let readiness = []
+  readiness.length = directory_names.length;
+  readiness.fill(0);
+
+  for (let i=0; i<directory_names.length; i++){
+    let res = execSync('wsl bash check_dir_script.sh ' +path_prefix+'/'+directory_names[i]);
+    let msg = res.toString('utf8').replace(/\0/g, '');
+    console.log(msg)
+    if (msg.includes("Exists")){
+      console.log("Benchmark "+directory_names[i]+ " "+ path_prefix+ " folder exists!")
+      readiness[i]=1;
+    } else {
+      console.log("Benchmark "+directory_names[i]+ " "+ path_prefix+ " not ready!")
+    }
+  }
+  console.log(String(readiness));
+
+  return readiness 
+}
+
+
+function check_structure(control_string){
+  try {
+    let directory_names = "";
+    let path_prefix = "";
+    if (control_string == "models"){
+      directory_names = MODEL_NAMES;
+      path_prefix = "models";
+    } else if (control_string == "datasets"){
+      directory_names = DATASET_NAMES;
+      path_prefix = "preprocessed_data";
+    } else {
+      throw new Error('Unnknown control string');
+    }
+    //Check directories on page change
+    // let model_directory_names = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"];
+    // let model_directory_names = ["SSDMobileNet"];
+    // let data_directory_names = DATASET_NAMES;
+    
+    check_scratch_path();
+    
+    let readiness = check_folders(path_prefix, directory_names);
+
+    // ToDo:Send model_readiness result to client
+    console.log(control_string+" ready status: "+String(readiness))
+  }catch (err){
+    // let msg = err.output.toString();
+    console.log(err)
+  }
+}
+
+
+function ftp_unzip(path_prefix, directory_names,selected_data){
+  // Run a script to download given data via nas ftp
+  // Run the ftp download script
+
+
+  // Iterate over selected_data and add model strings where selection is 1
+  let archives_to_download=""
+  
+  for (let i=0; i<selected_data.length; i++){
+    if (selected_data[i] == 1) {
+      // Compose ftp download string
+      archives_to_download = archives_to_download + directory_names[i] + ".zip ";
+    }
+  }
+  //Check if any data need to be downloaded
+  if (archives_to_download == ""){
+    console.log("No data selected, do nothing")
+    return 1;
+  }
+  // exec does not block the program! Should do the same for other long operations
+  let ftpprocess = exec('wsl bash myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/ /data/mlcommon/'+path_prefix+' '+archives_to_download);
+  ftpprocess.stdout.on('data', function (data) {
+    console.log(data);
+    // mainWindow.webContents.send("docker:pullMsg", data);
+    // mainWindow.webContents.send("docker:imgReady");
+  })
+  // After ftp finishes, try to unzip data files
+  ftpprocess.on('exit', (code) => {
+    
+    console.log(code);
+    if (code == 0){
+      // Not sure this exit code really indicates ftp download success, most likely just that ftp didn't crash
+      // ToDo: Maybe need to check success in some other way
+      // console.log("FTP download models finished correctly!");
+      console.log("FTP process exited correctly! But did it download your files???(\/)o_o(\/)");
+      // After the ftp download process finishes, should unzip files
+      //unzip /mnt/c/mlcommon/models/SSDMobileNet.zip -d /mnt/c/mlcommon/models/
+      //Unzip all data archives 1 by 1
+      // let unzip_command_base = 'unzip '+MLPERF_SCRATCH_PATH+ '/models/'
+      let subprocesses = []
+      for (let i=0;i<selected_data.length; i++){
+        if (selected_data[i] == 1) {
+          // Compose unzip command string
+          let unzip_command =  "unzip -o "+MLPERF_SCRATCH_PATH+ "/"+path_prefix+"/"+directory_names[i] + ".zip -d "+ MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/"';
+          // Can we spawn multiple subprocesses to unzip concurrently?
+          // Or do we need to use the same subprocess to launch commands?
+
+          // Try multiple subprocesses
+          let unzip_process = exec('wsl bash -c "' + unzip_command);
+          subprocesses.push(unzip_process)
+          unzip_process.stdout.on('data', function (data) {
+            console.log(data);
+
+          });
+          unzip_process.on('exit', (code) => {
+            subprocesses.pop()
+            if (subprocesses.length == 0){
+              // Emitt an event that indicates finishing all unzipping
+              myEmitter.emit('event', 0);
+            }
+          })
+        }
+      }
+    }
+  });
+  return 0;
+  // How to catch ftp error? try catch in here?
+}
+
+
+
+function update_data(control_string, selected_data){
+  try{
+    // Download models that are selected
+    let directory_names ="";
+    let path_prefix = "";
+    if (control_string == "models"){
+      directory_names = MODEL_NAMES;
+      path_prefix = "models";
+    } else if (control_string == "datasets"){
+      directory_names = DATASET_NAMES;
+      path_prefix = "preprocessed_data";
+    } else {
+      throw new Error('Unnknown control string');
+    }
+
+    ftp_unzip(path_prefix, directory_names, selected_data);
+  
+    myEmitter.on('event', function(code) {
+      if (code == 0){
+        let readiness = check_folders(path_prefix, directory_names);
+        console.log(control_string+" ready status: "+String(readiness))
+        //Send model status to client
+      }
+    })
+    
+    
+  } catch(err){
+    // let msg = err.output.toString();
+    console.log(err)
+  }
+  
+}
+
+
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
+  // check_structure("data");
+  // update_data("datasets", [0,0,1]);
   checkWSL();
   checkUbuntu();
   sudonpStatus();
