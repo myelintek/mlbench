@@ -308,8 +308,21 @@ function list_configs(){
   try{
     let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
 
-    let configs = res1.toString('utf8').replace(/\0/g, '');
+    let configs = res1.toString('utf8').replace(/\0/g, '').split('\n');
     console.log(configs);
+    let config_array = [];
+    for (let i=0; i<configs.length-1; i++){
+      // configs[i][-3] = " ";
+      // console.log(configs[i]);
+      let json_format = JSON.parse(configs[i])
+      // console.log(json_format);
+      config_array.push(json_format);
+    }
+    
+    // console.log(config_array);
+
+    // let json_format = JSON.parse(configs)
+    // console.log(json_format);
     // Split the original string line by line, result is an array of string lines
     // let line_split = configs.split('\n');
 
