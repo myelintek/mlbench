@@ -307,49 +307,69 @@ document.getElementById('downloadDatasets').addEventListener('click', (event) =>
   
 });
 
-var ctx = document.getElementById('chart').getContext('2d');
-var chart = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: [
-      'DGX-A100_A100-SXM 4x1', 
-      'NVIDIA A10x1', 
-      'NVIDIA T4x1', 
-      'NVIDIA GeForce RTX 3080x1 (NativePy)',
-      'NVIDIA GeForce RTX 3080x1 (TensorRT)' 
-    ],
-    datasets: [{
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(255, 99, 132)',
-        'rgb(255, 99, 132)',
-        'rgb(54, 162, 235)',
-        'rgb(54, 162, 235)'
-      ],
-      borderColor: [
-        'rgb(255, 99, 132)',
-        'rgb(255, 99, 132)',
-        'rgb(255, 99, 132)',
-        'rgb(54, 162, 235)',
-        'rgb(54, 162, 235)'
-      ],
-      data: [37479.50, 13805.20, 6035.57, 755.83, 15053.60]
-    }]
-  },
-  options: {
-    plugins: {
-      legend: {
-        display: false
-      },
-      title: {
-        display: true,
-        text: 'ImageClassify, ImageNet, ResNet50, Offline',
-        font: {
-            size: 24
-        },
-        align: 'start'
-      }    
-    },
-    indexAxis: 'y',
+document.getElementById('checkResults').addEventListener('click', (event) => {
+  ipcRenderer.send('results:check');
+  
+});
+
+ipcRenderer.on("results:data_output", (event, msg) => {
+  var ctx = document.getElementById('chart'); //.getContext('2d');
+  var inp_labels = [
+    'DGX-A100_A100-SXM 4x1', 
+    'NVIDIA A10x1', 
+    'NVIDIA T4x1'
+  ];
+
+  var inp_background_color = [
+    'rgb(255, 99, 132)',
+    'rgb(255, 99, 132)',
+    'rgb(255, 99, 132)'
+  ];
+
+  var inp_border_color = [
+    'rgb(255, 99, 132)',
+    'rgb(255, 99, 132)',
+    'rgb(255, 99, 132)'
+  ];
+
+  var inp_data = [37479.50, 13805.20, 6035.57];
+
+  for (var key in msg['ssd-resnet34']) {
+    inp_labels.push(msg['ssd-resnet34'][key]["gpu"]);
+    inp_background_color.push('rgb(54, 162, 235)');
+    inp_border_color.push('rgb(54, 162, 235)');
+    inp_data.push(msg['ssd-resnet34'][key]["result"])
   }
+
+  var chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: inp_labels,
+      datasets: [{
+        backgroundColor: inp_background_color,
+        borderColor: inp_border_color,
+        data: inp_data
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: 'ImageClassify, ImageNet, ResNet50, Offline',
+          font: {
+              size: 24
+          },
+          align: 'start'
+        }    
+      },
+      indexAxis: 'y',
+    }
+  })
+
+  ctx.style.display = "block";
+
 })
+

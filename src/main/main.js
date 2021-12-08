@@ -598,7 +598,7 @@ function get_run_info(results_json){
     // fs.statSync(path+'/'+file).isDirectory()
     // });
     let res = fs.readdirSync(path);
-    console.log(res);
+    // console.log(res);
     for (let i=0; i< res.length; i++){
       results_json = get_result_json(path, res[i], results_json);
     }
@@ -737,4 +737,8 @@ ipcMain.on('download:models', (e, args) => {
 ipcMain.on('download:datasets', (e, args) => {
   console.log(args);
   update_data("datasets", args)
+})
+
+ipcMain.on('results:check', () => {
+  mainWindow.webContents.send("results:data_output", parse_results_into_graphs());
 })
