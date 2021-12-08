@@ -319,8 +319,6 @@ function imgRun() {
   }
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 function list_configs(){
   try{
     let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
@@ -340,6 +338,8 @@ function list_configs(){
       
       config_array.push(json_format);
     }
+    mainWindow.webContents.send("scenario:supported_configs", config_array);
+
 
     // console.log(config_ready_status);
 

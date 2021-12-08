@@ -72,10 +72,6 @@ ipcRenderer.on("wsl:fail", () => {
   document.getElementById("wslStatus").innerHTML = "Fail";
 })
 
-// ipcRenderer.on("wsl:note", (event, msg) => {
-//   document.getElementById("wslNote").innerHTML = msg;
-// });
-
 ipcRenderer.on("ub:pass", () => {
   document.getElementById("ubStatus").innerHTML = "Pass";
 })
@@ -83,11 +79,6 @@ ipcRenderer.on("ub:pass", () => {
 ipcRenderer.on("ub:fail", () => {
   document.getElementById("ubStatus").innerHTML = "Fail";
 })
-
-// ipcRenderer.on("ub:note", (event, msg) => {
-//   console.log(msg);
-//   document.getElementById("ubNote").innerHTML = msg;
-// })
 
 ipcRenderer.on("sudo:pass", () => {
   document.getElementById("sudonpStatus").innerHTML = "Pass";
@@ -105,11 +96,6 @@ ipcRenderer.on("docker:fail", () => {
   document.getElementById("dockerStatus").innerHTML = "Fail";
 })
 
-// ipcRenderer.on("docker:note", (event, msg) => {
-//   console.log(msg);
-//   document.getElementById("dockerNote").innerHTML = msg;
-// })
-
 ipcRenderer.on("nv:pass", () => {
   document.getElementById("nvStatus").innerHTML = "Pass"
 })
@@ -117,10 +103,6 @@ ipcRenderer.on("nv:pass", () => {
 ipcRenderer.on("nv:fail", () => {
   document.getElementById("nvStatus").innerHTML = "Fail"
 })
-
-// ipcRenderer.on("nv:status", (event, msg) => {
-//   document.getElementById("nvNote").innerHTML = msg;
-// })
 
 ipcRenderer.on("env:pass", () => {
   document.getElementById("wslEnvStatus").innerHTML = "Ready"
@@ -171,7 +153,6 @@ document.getElementById('gpuCheck').addEventListener('click', (event) => {
 });
 
 ipcRenderer.on("gpu:supported_systems", (event, msg) => {
-  // console.log(msg);
   var tblBody = document.createElement("tbody");
   for (var i = 0; i < msg.length; i++) {
     var row = document.createElement("tr");
@@ -187,7 +168,6 @@ document.getElementById("gpuTable").append(tblBody)
 })
 
 ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
-  // console.log(supp_msg);
   document.getElementById("gpuStatus").innerHTML = supp_msg;
 })
 
@@ -197,11 +177,14 @@ document.getElementById('scenarioCheck').addEventListener('click', (event) => {
 });
 
 ipcRenderer.on("scenario:supported_configs", (event, msg) => {
-  console.log(msg);
+  for (var i = 0; i < msg.length; i++) {
+    var tempPre = document.getElementById(msg[i]["benchmark"]);
+    tempPre.innerHTML = JSON.stringify(msg[i]).replace(/,/g, "\n");
+  }
 })
 
 document.getElementById('extend1').addEventListener('click', (event) => {
-  var x = document.getElementById("scenario1");
+  var x = document.getElementById("ResNet50");
   if (x.style.display === "none") {
     x.style.display = "block";
     document.getElementById('fa1').classList.toggle("fa-minus");
@@ -212,7 +195,7 @@ document.getElementById('extend1').addEventListener('click', (event) => {
 });
 
 document.getElementById('extend2').addEventListener('click', (event) => {
-  var x = document.getElementById("scenario2");
+  var x = document.getElementById("SSDResNet34");
   if (x.style.display === "none") {
     x.style.display = "block";
     document.getElementById('fa2').classList.toggle("fa-minus");
@@ -223,7 +206,7 @@ document.getElementById('extend2').addEventListener('click', (event) => {
 });
 
 document.getElementById('extend3').addEventListener('click', (event) => {
-  var x = document.getElementById("scenario3");
+  var x = document.getElementById("SSDMobileNet");
   if (x.style.display === "none") {
     x.style.display = "block";
     document.getElementById('fa3').classList.toggle("fa-minus");
@@ -234,7 +217,7 @@ document.getElementById('extend3').addEventListener('click', (event) => {
 });
 
 document.getElementById('extend4').addEventListener('click', (event) => {
-  var x = document.getElementById("scenario4");
+  var x = document.getElementById("BERT");
   if (x.style.display === "none") {
     x.style.display = "block";
     document.getElementById('fa4').classList.toggle("fa-minus");
@@ -378,3 +361,9 @@ document.getElementById('runBenchmark').addEventListener('click', (event) => {
   event.preventDefault();
   ipcRenderer.send('benchmark:run');  
 });
+
+var stepperElem = document.querySelector('.bs-stepper');
+stepperElem.addEventListener('shown.bs-stepper', function (e) {
+  var idx = e.detail.indexStep + 1;
+  console.log('step shown', idx)
+})
