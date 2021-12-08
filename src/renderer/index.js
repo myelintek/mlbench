@@ -332,13 +332,14 @@ ipcRenderer.on("results:data_output", (event, msg) => {
     'rgb(255, 99, 132)'
   ];
 
-  var inp_data = [37479.50, 13805.20, 6035.57];
+  // var inp_data = [37479.50, 13805.20, 6035.57];
+  var inp_data = [47779.20, 18529.20, 7399.41];
 
-  for (var key in msg['ssd-resnet34']) {
-    inp_labels.push(msg['ssd-resnet34'][key]["gpu"]);
+  for (var key in msg['ssd-mobilenet']) {
+    inp_labels.push(msg['ssd-mobilenet'][key]["gpu"]);
     inp_background_color.push('rgb(54, 162, 235)');
     inp_border_color.push('rgb(54, 162, 235)');
-    inp_data.push(msg['ssd-resnet34'][key]["result"])
+    inp_data.push(msg['ssd-mobilenet'][key]["result"])
   }
 
   var chart = new Chart(ctx, {
@@ -358,7 +359,7 @@ ipcRenderer.on("results:data_output", (event, msg) => {
         },
         title: {
           display: true,
-          text: 'ImageClassify, ImageNet, ResNet50, Offline',
+          text: 'ObjectDetection, COCO, SSD-MobileNet, Offline',
           font: {
               size: 24
           },
