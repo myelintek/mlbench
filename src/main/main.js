@@ -263,7 +263,7 @@ function runDocker() {
       // Probably don't need to build the image if we have already pulled it, should be the same image, just need to map the paths correctly using prebuild
       try{
         execSync("wsl export NO_BUILD=1");
-        let res1 = execSync('wsl bash -c "cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
+        let res1 = execSync('wsl bash -c "export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
         let so1 = res1.toString('utf8').replace(/\0/g, '');
         
       } catch (err){
