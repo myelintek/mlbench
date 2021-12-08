@@ -114,7 +114,6 @@
         <h1>Setup Environment</h1>
         <hr>
           <div class="p-3">
-              <p>Create folders C:\mlperf to store data, models, preprocessed data and results of running benchmarks, it's shared among models</p>
               <button type="button" class="btn btn-primary" id="wslEnvSetup">Setup</button>
               <label id="wslEnvStatus">Not Ready</label>
           </div>
@@ -122,14 +121,11 @@
         <h1>Launching the environment (make prebuild)</h1>
         <hr>
           <div class="p-3">
-          <p>Create/Pull the benchmark docker image. <b>cr.myelintek.com/mlcommon/mlperf-inference:x86_64</b></p>
           <button type="button" class="btn btn-primary" id="imgPull">Pull</button>
           <label id="imgPullStatus">Not Ready</label>
           <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;" id="imgPullConsole">
       
           </div>
-          <p>Start the benchmark container which has all dependencies set up for preprocessing data and running benchmarks</p>
-          <p>TODO, export MLPERF_SCRATCH_PATH, make prebuild</p>
           <button type="button" class="btn btn-primary" id="imgRun">Run</button>
           <label id="imgRunStatus">Not Ready</label>
           </div>
@@ -347,30 +343,40 @@
           <table class="table">
             <thead>
               <tr>
+                <th></th>
                 <th>Model</th>
+                <th>Dataset</th>
                 <th>Scenario</th>
                 <th>Status</th>
               </tr>  
             </thead>
             <tr>
+              <td><input type="checkbox"></td>
               <td>ResNet50</td>
-              <td>Offline</td>
+              <td>Not Ready</td>
               <td>Unknown</td>
+              <td>Offline</td>
             </tr>
             <tr>
+              <td><input type="checkbox"></td>
               <td>SSD-Resnet34</td>
-              <td>Offline</td>
+              <td>Not Ready</td>
               <td>Unknown</td>
+              <td>Offline</td>
             </tr>
             <tr>
+              <td><input type="checkbox"></td>
               <td>SSD-Mobilenet</td>
-              <td>Offline</td>
+              <td>Not Ready</td>
               <td>Unknown</td>
+              <td>Offline</td>
             </tr>
             <tr>
+              <td><input type="checkbox"></td>
               <td>Bert</td>
-              <td>Offline</td>
+              <td>Not Ready</td>
               <td>Unknown</td>
+              <td>Offline</td>
             </tr>
           </table>  
         </div>
