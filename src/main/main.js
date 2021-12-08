@@ -15,7 +15,19 @@ const MLPERF_SCRATCH_PATH = "/mnt/c/mlcommon"
 const MODEL_NAMES = ["SSDMobileNet", "SSDResNet34", "ResNet50", "bert"]
 const DATASET_NAMES = ["coco", "imagenet", "squad_tokenized"]
 const VALID_BENCHMARKS = ["ssd-mobilenet", "ssd-resnet34", "resnet50", "bert"]
-
+var model_ready_status = {"SSDMobileNet" : 0, "SSDResNet34": 0, "ResNet50": 0, "bert": 0}
+var dataset_ready_status = {"coco":0, "imagenet":0, "squad_tokenized":0}
+var config_ready_status = {"SSDMobileNet":0, "SSDResNet34":0, "ResNet50":0, "BERT":0}
+// var base_benchmark_status = {"model":0,"dataset":0,"config":0}
+var benchmark_meta = {"ssd-mobilenet":{"dataset":"coco", "model":"SSDMobileNet", "config":"SSDMobileNet"},
+                      "ssd-resnet34":{"dataset":"coco", "model":"SSDResNet34", "config":"SSDResNet34"},
+                      "resnet50":{"dataset":"imagenet", "model":"ResNet50", "config":"ResNet50"},
+                      "bert":{"dataset":"squad_tokenized", "model":"bert", "config":"BERT"}
+}
+var benchmark_ready_status = {"ssd-mobilenet":{"model":0,"dataset":0,"config":0}, 
+                              "ssd-resnet34":{"model":0,"dataset":0,"config":0}, 
+                              "resnet50":{"model":0,"dataset":0,"config":0}, 
+                              "bert":{"model":0,"dataset":0,"config":0}}
 // const CONTAINER_NAME = "mlbenchmarks"
 
 const EventEmitter = require('events');
@@ -314,17 +326,22 @@ function list_configs(){
     let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
 
     let configs = res1.toString('utf8').replace(/\0/g, '').split('\n');
-    console.log(configs);
+    // console.log(configs);
     let config_array = [];
     for (let i=0; i<configs.length-1; i++){
       // configs[i][-3] = " ";
       // console.log(configs[i]);
       let json_format = JSON.parse(configs[i])
-      // console.log(json_format);
+
+      console.log(json_format);
+      if ('benchmark' in json_format){
+        config_ready_status[json_format['benchmark']] = 1;
+      }
+      
       config_array.push(json_format);
     }
 
-    // console.log(config_array);
+    // console.log(config_ready_status);
 
     // let json_format = JSON.parse(configs)
     // console.log(json_format);
@@ -683,6 +700,115 @@ function parse_results_into_graphs(){
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// Run benchmarks tab
+
+// Check benchmark status & send to client
+function check_benchmarks(){
+  try {
+    // Check model dolders
+    let model_readiness = check_structure("models");
+    let dataset_readiness = check_structure("datasets");
+
+    for (let i=0; i<model_readiness.length; i++){
+
+      model_ready_status[MODEL_NAMES[i]]=model_readiness[i];
+    }
+    // console.log(MODEL_NAMES, model_readiness)
+
+    for (let i=0; i<dataset_readiness.length; i++){
+
+      dataset_ready_status[DATASET_NAMES[i]]=dataset_readiness[i];
+    }
+
+    for (let i=0; i<VALID_BENCHMARKS.length; i++){
+      // Check every meta parameter
+      // benchmark_meta
+      let benchmark_key = VALID_BENCHMARKS[i];
+      let benchmark_dataset = benchmark_meta[benchmark_key]['dataset'];
+      let benchmark_model = benchmark_meta[benchmark_key]['model'];
+      let benchmark_config = benchmark_meta[benchmark_key]['config'];
+      // console.log(benchmark_key, benchmark_dataset, benchmark_model, benchmark_config)
+
+      // Assign the ready status of the dataset to the ready status of a benchmarks dataset
+      benchmark_ready_status[benchmark_key]['dataset']=dataset_ready_status[benchmark_dataset];
+      // Model status
+      benchmark_ready_status[benchmark_key]['model']=model_ready_status[benchmark_model];
+      // Config status
+      benchmark_ready_status[benchmark_key]['config']=config_ready_status[benchmark_config];
+    }
+    console.log(benchmark_ready_status)
+    // Send benchmark ready status to client
+    return benchmark_ready_status
+  } catch (err) {
+    console.log(err);
+  }
+  
+}
+// Build benchmarks
+function build_benchmarks(){
+
+  try {
+    // Run make build in the background
+    let build_process = exec('wsl bash -c "docker exec '+ CONTAINER_NAME + ' make build"');
+    // Print out the log
+    build_process.stdout.on('data', function (data) {
+      console.log(data);
+      // mainWindow.webContents.send("docker:pullMsg", data);
+      // mainWindow.webContents.send("docker:imgReady");
+    })
+    // When the process finishes send build ready status
+    build_process.on('exit', (code) => {
+      console.log("Build benchmarks exit code:"+String(code));
+      if (code==0){
+        console.log("Build run finished. But was it successful? (\/)0_0(\/)");
+        // Emit event that finished building
+        myEmitter.emit('event', 1);
+      }
+      
+    })
+  } catch (err) {
+    console.log(err);
+  }
+}
+// Run benchmarks
+function run_benchmarks(benchmark_names){
+
+  myEmitter.on('event', function(code) {
+    if (code == 1){
+      // Benchmark build finished, proceed with running
+      try {
+
+        let benchmark_run_args =""
+        for (let i=0; i<benchmark_names.length; i++){
+          benchmark_run_args=benchmark_names[i]+','+benchmark_run_args;
+        }
+        benchmark_run_args = benchmark_run_args.slice(0, -1);
+        console.log(benchmark_run_args);
+        // Run make build in the background
+        let run_process = exec(`wsl bash -c 'docker exec `+ CONTAINER_NAME + ` make run RUN_ARGS="--benchmarks=`+benchmark_run_args+` --scenarios=offline --fast"'`);
+        // Print out the log
+        run_process.stdout.on('data', function (data) {
+          console.log(data);
+          // mainWindow.webContents.send("docker:pullMsg", data);
+          // mainWindow.webContents.send("docker:imgReady");
+        })
+        // When the process finishes send build ready status
+        run_process.on('exit', (code) => {
+          console.log("Run benchmarks exit code:"+String(code));
+          if (code==0){
+            console.log("Run benchmarks finished. But was it successful? (\/)0_0(\/)");
+    
+            
+          }
+          
+        })
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  })
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 ipcMain.on('wsl:check', () => {
   console.log("wsl:check");
@@ -690,6 +816,11 @@ ipcMain.on('wsl:check', () => {
   // update_data("datasets", [0,0,1]);
   // get_run_info();
   // parse_results_into_graphs();
+  // list_configs();
+  // check_benchmarks();
+  // build_benchmarks();
+  // run_benchmarks(["ssd-mobilenet"]);
+
   checkWSL();
   checkUbuntu();
   sudonpStatus();
@@ -746,4 +877,7 @@ ipcMain.on('results:check', () => {
 ipcMain.on('benchmark:run', () => {
   // TODO run benchmark
   console.log("for Seryi");
+  check_benchmarks();
+  build_benchmarks();
+  run_benchmarks(["ssd-mobilenet"]);
 })
