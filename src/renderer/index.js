@@ -308,8 +308,8 @@ document.getElementById('downloadDatasets').addEventListener('click', (event) =>
 });
 
 document.getElementById('checkResults').addEventListener('click', (event) => {
+  event.preventDefault();
   ipcRenderer.send('results:check');
-  
 });
 
 ipcRenderer.on("results:data_output", (event, msg) => {
@@ -373,3 +373,7 @@ ipcRenderer.on("results:data_output", (event, msg) => {
 
 })
 
+document.getElementById('runBenchmark').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('benchmark:run');  
+});

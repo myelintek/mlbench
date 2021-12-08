@@ -742,3 +742,8 @@ ipcMain.on('download:datasets', (e, args) => {
 ipcMain.on('results:check', () => {
   mainWindow.webContents.send("results:data_output", parse_results_into_graphs());
 })
+
+ipcMain.on('benchmark:run', () => {
+  // TODO run benchmark
+  console.log("for Seryi");
+})
