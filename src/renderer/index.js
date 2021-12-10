@@ -7,6 +7,12 @@ var stepper1 = new Stepper(document.querySelector('#stepper1'), {
   linear: false
 })
 
+
+// document.on('click', 'a[href^="http"]', function(event) {
+//   event.preventDefault();
+//   ipcRenderer.openExternal(this.href);
+// });
+
 document.getElementById('nextButton').addEventListener('click', (event) => {
     stepper1.next();
 });
@@ -373,70 +379,126 @@ document.getElementById('runBenchmark').addEventListener('click', (event) => {
 });
 
 ipcRenderer.on("results:data_output", (event, msg) => {
-  let chartStatus = Chart.getChart("chart"); // <canvas> id
-  if (chartStatus != undefined) {
-    chartStatus.destroy();
-  }
+  
 
-  var ctx = document.getElementById('chart'); //.getContext('2d');
-  var inp_labels = [
-    'DGX-A100_A100-SXM 4x1', 
-    'NVIDIA A10x1', 
-    'NVIDIA T4x1'
-  ];
-
-  var inp_background_color = [
-    'rgb(255, 99, 132)',
-    'rgb(255, 99, 132)',
-    'rgb(255, 99, 132)'
-  ];
-
-  var inp_border_color = [
-    'rgb(255, 99, 132)',
-    'rgb(255, 99, 132)',
-    'rgb(255, 99, 132)'
-  ];
+  var charts = []
 
   // var inp_data = [37479.50, 13805.20, 6035.57];
-  var inp_data = [47779.20, 18529.20, 7399.41];
+  let inp_data = [47779.20, 18529.20, 7399.41];
+  let chart_description = ['Object Detection, COCO, SSD-MobileNet, Offline', 
+                            'Image Recognition, COCO, ResNet50, Offline',
+                            'Object Detection, COCO, SSD-ResNet34, Offline',
+                            'NLP, Squadv1.1, BERT, Offline'];
 
-  // TODO: Remove this hardcode
-  for (var key in msg['ssd-mobilenet']) {
-    inp_labels.push(msg['ssd-mobilenet'][key]["gpu"]);
-    inp_background_color.push('rgb(54, 162, 235)');
-    inp_border_color.push('rgb(54, 162, 235)');
-    inp_data.push(msg['ssd-mobilenet'][key]["result"])
+  let msg_keys = Object.keys(msg);
+  let ctx;
+  let inp_labels;
+  let inp_background_color;
+  let inp_border_color;
+  for (let i = 0; i<msg_keys.length; i++ ) {
+    var chartStatus = Chart.getChart("chart"+String(i)); // <canvas> id
+    if (chartStatus != undefined) {
+      chartStatus.destroy();
+    }
+    ctx = document.getElementById('chart'+String(i)); //.getContext('2d');
+    inp_labels = [
+      'DGX-A100_A100-SXM 4x1', 
+      'NVIDIA A10x1', 
+      'NVIDIA T4x1'
+    ];
+
+    inp_background_color = [
+      'rgb(255, 99, 132)',
+      'rgb(255, 99, 132)',
+      'rgb(255, 99, 132)'
+    ];
+
+    inp_border_color = [
+      'rgb(255, 99, 132)',
+      'rgb(255, 99, 132)',
+      'rgb(255, 99, 132)'
+    ];
+    let benchmark = msg_keys[i];
+    for (var key in msg[benchmark]){
+      inp_labels.push(msg[benchmark][key]["gpu"]);
+      inp_background_color.push('rgb(54, 162, 235)');
+      inp_border_color.push('rgb(54, 162, 235)');
+      inp_data.push(msg[benchmark][key]["result"])
+    }
+    
+
+    let chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: inp_labels,
+        datasets: [{
+          backgroundColor: inp_background_color,
+          borderColor: inp_border_color,
+          data: inp_data
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: chart_description[i],
+            font: {
+                size: 24
+            },
+            align: 'start'
+          }    
+        },
+        indexAxis: 'y',
+      }
+    })
+    charts.push(chart);
+    ctx.style.display = "block";
   }
 
-  var chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: inp_labels,
-      datasets: [{
-        backgroundColor: inp_background_color,
-        borderColor: inp_border_color,
-        data: inp_data
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: 'ObjectDetection, COCO, SSD-MobileNet, Offline',
-          font: {
-              size: 24
-          },
-          align: 'start'
-        }    
-      },
-      indexAxis: 'y',
-    }
-  })
+  
 
-  ctx.style.display = "block";
+  // TODO: Remove this hardcode
+  // for (var key in msg['ssd-mobilenet']) {
+  //   inp_labels.push(msg['ssd-mobilenet'][key]["gpu"]);
+  //   inp_background_color.push('rgb(54, 162, 235)');
+  //   inp_border_color.push('rgb(54, 162, 235)');
+  //   inp_data.push(msg['ssd-mobilenet'][key]["result"])
+
+
+  // }
+
+  // var chart = new Chart(ctx, {
+  //   type: 'bar',
+  //   data: {
+  //     labels: inp_labels,
+  //     datasets: [{
+  //       backgroundColor: inp_background_color,
+  //       borderColor: inp_border_color,
+  //       data: inp_data
+  //     }]
+  //   },
+  //   options: {
+  //     plugins: {
+  //       legend: {
+  //         display: false
+  //       },
+  //       title: {
+  //         display: true,
+  //         text: 'ObjectDetection, COCO, SSD-MobileNet, Offline',
+  //         font: {
+  //             size: 24
+  //         },
+  //         align: 'start'
+  //       }    
+  //     },
+  //     indexAxis: 'y',
+  //   }
+  // })
+
+  
 
 })
 

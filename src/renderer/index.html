@@ -58,19 +58,36 @@
     <div class="bs-stepper-content">
       <!-- your steps content here -->
       <div id="system-check" class="bs-stepper-pane active dstepper-block" role="tabpanel" aria-labelledby="system-check-trigger">
+        <h1>System Check</h1>
+        <hr>
+        <tbody>
+          Follow guides in the table below to setup your system. Need to get a pass on every item.
+        </tbody>
+        <!-- <textarea id="system-check-description" name="system-check-description" rows="4" cols="100">
+          At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+        </textarea> -->
+        <!-- <tbody>
+          You need to install WSL2 and setup Ubuntu 20.04 <a href="https://docs.microsoft.com/en-gb/windows/wsl/install">Microsoft guide</a>, 
+          <br>add a sudoer user without password <a href="https://phpraxis.wordpress.com/2016/09/27/enable-sudo-without-password-in-ubuntudebian/">No sudo</a>, 
+          <br>install docker for WSL <a href="https://docs.docker.com/desktop/windows/wsl/">Docker guide</a> and 
+          <br>NVIDIA drivers for WSL <a href="https://docs.nvidia.com/cuda/wsl-user-guide/index.html">NVIDIA CUDA guide</a>.
+        </tbody> -->
         <div class="p-3">
           <table class="table" style="table-layout: fixed;">
             <thead>
               <tr>
                 <th style="width: 25%">Item</th>
                 <th style="width: 10%">Status</th>
+                <th style="width: 20%">Guides</th>
                 <!-- <th style="width: 65%">Notes</th> -->
               </tr>  
             </thead>
             <tr>
               <td>WSL2</td>
               <!-- <td id="wslStatus">Unknown</td> -->
-              <td id="wslStatus"></td>
+              <td id="wslStatus">Unknown</td>
+
+              <td><a href="https://docs.microsoft.com/en-gb/windows/wsl/install" target="_blank">Microsoft guide</a></td>
               <!-- <td>
                 <pre id="wslStatus"></pre>
               </td> -->
@@ -81,6 +98,7 @@
             <tr>
               <td>WSL2 Ubuntu 20.04</td>
               <td id="ubStatus">Unknown</td>
+              <td><a href="https://docs.microsoft.com/en-gb/windows/wsl/install" target="_blank">Microsoft guide</a></td>
               <!-- <td>
                 <pre id="ubNote"></pre>
               </td> -->
@@ -88,6 +106,7 @@
             <tr>
               <td>Ubuntu sudoer NOPASSWD</td>
               <td id="sudonpStatus">Unknown</td>
+              <td><a href="https://phpraxis.wordpress.com/2016/09/27/enable-sudo-without-password-in-ubuntudebian/" target="_blank">No sudo guide</a></td>
               <!-- <td id="sudonpNote">
                 echo "`whoami` ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
               </td> -->
@@ -95,11 +114,13 @@
             <tr>
               <td>Docker</td>
               <td id="dockerStatus">Unknown</td>
+              <td><a href="https://docs.docker.com/desktop/windows/wsl/" target="_blank">Docker guide</a></td>
               <!-- <td id="dockerNote"></td> -->
             </tr>
             <tr>
               <td>Nvidia Driver</td>
               <td id="nvStatus">Unknown</td>
+              <td><a href="https://docs.nvidia.com/cuda/wsl-user-guide/index.html" target="_blank">NVIDIA CUDA guide</a></td>
               <!-- <td>
                 <pre id="nvNote"></pre>
               </td> -->
@@ -113,29 +134,56 @@
       <div id="setup-lunch-environment" class="bs-stepper-pane" role="tabpanel" aria-labelledby="setup-lunch-environment-trigger">
         <h1>Setup Environment</h1>
         <hr>
+        <tbody>
+          Create directory to store benchmark models and datasets. Default is <b>C:\mlcommon</b> in Windows which is mapped to <b>/mnt/c/mlcommon/</b> in Ubuntu WSL.
+          <br>This <a href="https://github.com/myelintek/inference_results_v1.1" target="_blank">GitHub repository</a> is required to run benchmarks and is cloned onto your machine.
+        </tbody>
+        <hr>
           <div class="p-3">
               <button type="button" class="btn btn-primary" id="wslEnvSetup">Setup</button>
               <label id="wslEnvStatus">Not Ready</label>
           </div>
         <hr>
-        <h1>Launching the environment (make prebuild)</h1>
+        <h1>Prepare benchmark docker environment</h1>
+        <tbody>
+          Benchmarks need to be run in a prebuild docker container to easily meet all dependencies. Pull and run the image, if it is not already running.
+        </tbody>
         <hr>
+          
           <div class="p-3">
+          <tbody>
+            <b>Pull the docker image:</b>
+          </tbody>
           <button type="button" class="btn btn-primary" id="imgPull">Pull</button>
           <label id="imgPullStatus">Not Ready</label>
+          
           <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;" id="imgPullConsole">
       
           </div>
+          <tbody>
+            <b>Launch the docker image:</b>
+          </tbody>
           <button type="button" class="btn btn-primary" id="imgRun">Run</button>
           <label id="imgRunStatus">Not Ready</label>
+          
           </div>
         <hr>
         <button id="prevButton">Previous</button>
         <button id="nextButton1">Next</button>
       </div>
       <div id="check-gpu" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-gpu-trigger">
+        <h1>Supported GPUs</h1>
+        <hr>
         <div class="p-3">
-          <label id="gpuStatus"></label>
+          
+          <tbody>
+            Supported systems can be found in <b>inference_results_v1.1\closed\MyelinTek\code\common\system_list.py</b>. To add a system, you need to manually input your GPU information in the <b>KnownSystems</b> class.
+            <br>
+            <b>Status:</b>
+            <label id="gpuStatus"></label>
+
+          </tbody>
+            
           <table id="gpuTable" class="table">
             <thead>
               <tr>
@@ -152,7 +200,14 @@
         <button id="nextButton2">Next</button>
       </div>
       <div id="check-scenario" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-scenario-trigger">
+        <h1>Available benchmark configurations </h1>
+        <hr>
         <div class="p-3">
+          
+          <tbody>Check for available benchmark configurations for your GPU. Config files for a benchmark/scenario pair can be found in <b>inference_results_v1.1\closed\MyelinTek\configs\[BENCHMARK]\[SCENARIO]\__init__.py</b>
+          <br>To add a config for a specific benchmark, say SSD-Mobilenet, and the Offline scenario, please modify <b>inference_results_v1.1\closed\MyelinTek\configs\ssd-mobilenet\Offline\__init__.py</b> and add your own configuration.
+          
+          </tbody>
           <table class="table">
             <thead>
               <tr>
@@ -211,6 +266,9 @@
       <div id="download" class="bs-stepper-pane" role="tabpanel" aria-labelledby="download-trigger">
         <h1>Download the Model files</h1>
         <hr>
+        <tbody>
+          Models are stored in <b>/mnt/c/mlcommon/models</b> by default. 
+        </tbody>
         <div class="p-3">
           <button id="downloadModels" type="button" class="btn btn-primary">Download Models</button>
           <table class="table">
@@ -219,38 +277,41 @@
                 <th></th>
                 <th>Model</th>
                 <th>Status</th>
-                <th>Notes</th>
+                <th>Size</th>
               </tr>  
             </thead>
             <tr>
               <td><input type="checkbox" id="resnet50Check"></td>
               <td>resnet50</td>
               <td id="resnet50Status">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/models/ResNet50</td>
+              <td>90 Mb</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="resnet34Check"></td>
               <td>ssd-resnet34</td>
               <td id="resnet34Status">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/models/SSDResNet34</td>
+              <td>71 Mb</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="mobilenetCheck"></td>
               <td>ssd-mobilenet</td>
               <td id="mobilenetStatus">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/models/SSDMobileNet</td>
+              <td>24 Mb</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="bertCheck"></td>
               <td>bert</td>
               <td id="bertStatus">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/models/bert</td>
+              <td>2.3 Gb</td>
             </tr>
           </table>  
         </div>
         <hr>
         <h1>Download the Preprocessed datasets</h1>
         <hr>
+        <tbody>
+          Preprocessed datasets are stored in <b>/mnt/c/mlcommon/preprocessed_data</b> by default. 
+        </tbody>
         <div class="p-3">
           <button id="downloadDatasets" type="button" class="btn btn-primary">Download Datasets</button>
           <table class="table">
@@ -260,7 +321,7 @@
                 <th>Dataset</th>
                 <th>Models</th>
                 <th>Status</th>
-                <th>Notes</th>
+                <th>Size</th>
               </tr>  
             </thead>
             <tr>
@@ -268,21 +329,21 @@
               <td>ImageNet 2012 Validation Set</td>
               <td>resnet50</td>
               <td id="imagenetStatus">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/imagenet</td>
+              <td>5.5 Gb</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="cocoCheck"></td>
               <td>COCO 2017 Dataset</td>
               <td>ssd-resnet34, ssd-mobilenet</td>
               <td id="cocoStatus">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
+              <td>14.7 Gb</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="squadCheck"></td>
               <td>SQuAD v1.1</td>
               <td>bert</td>
               <td id="squadStatus">Not Ready</td>
-              <td>$MLPERF_SCRATCH_PATH/preprocessed_data/squad_tokenized</td>
+              <td>1 Mb</td>
             </tr>
           </table>  
         </div>
@@ -291,6 +352,14 @@
         <button id="nextButton4">Next</button>
       </div>
       <div id="run-benchmark" class="bs-stepper-pane" role="tabpanel" aria-labelledby="run-benchmark-trigger">
+        <h1>
+          Build and run benchmarks
+        </h1>
+        <hr>
+        <tbody>
+          Build the benchmark binaries and link some libraries once.
+          <br>Choose benchmarks that are ready and run them.
+        </tbody>
         <div class="p-3">
           <button id="runBenchmark" type="button" class="btn btn-primary">Run Benchmark</button>
           <table class="table">
@@ -343,8 +412,25 @@
         <button id="nextButton5">Next</button>
       </div>
       <div id="results" class="bs-stepper-pane" role="tabpanel" aria-labelledby="results-trigger">
+        <h1>Compare results of 4 different benchmarks</h1>
+        <hr>
+        <tbody>
+          Plot the latest results of benchmark runs and compare them to publicly available results.
+        </tbody>
         <div class="p-3">
-          <canvas id="chart" style="display: none;"></canvas>
+          <canvas id="chart0" style="display: none;"></canvas>
+        </div>
+        <hr>
+        <div class="p-3">
+          <canvas id="chart1" style="display: none;"></canvas>
+        </div>
+        <hr>
+        <div class="p-3">
+          <canvas id="chart2" style="display: none;"></canvas>
+        </div>
+        <hr>
+        <div class="p-3">
+          <canvas id="chart3" style="display: none;"></canvas>
         </div>
         <hr>
         <button id="prevButton5">Previous</button>
