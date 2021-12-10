@@ -24,10 +24,10 @@ var benchmark_meta = {"ssd-mobilenet":{"dataset":"coco", "model":"SSDMobileNet",
                       "resnet50":{"dataset":"imagenet", "model":"ResNet50", "config":"ResNet50"},
                       "bert":{"dataset":"squad_tokenized", "model":"bert", "config":"BERT"}
 }
-var benchmark_ready_status = {"ssd-mobilenet":{"model":0,"dataset":0,"config":0}, 
-                              "ssd-resnet34":{"model":0,"dataset":0,"config":0}, 
-                              "resnet50":{"model":0,"dataset":0,"config":0}, 
-                              "bert":{"model":0,"dataset":0,"config":0}}
+var benchmark_ready_status = {"ssd-mobilenet":{"model":0,"dataset":0,"config":0,"status":0}, 
+                              "ssd-resnet34":{"model":0,"dataset":0,"config":0,"status":0}, 
+                              "resnet50":{"model":0,"dataset":0,"config":0,"status":0}, 
+                              "bert":{"model":0,"dataset":0,"config":0,"status":0}}
 
 var benchmarks_build_flag = 0
 // const CONTAINER_NAME = "mlbenchmarks"
@@ -742,6 +742,9 @@ function check_benchmarks(){
       benchmark_ready_status[benchmark_key]['model']=model_ready_status[benchmark_model];
       // Config status
       benchmark_ready_status[benchmark_key]['config']=config_ready_status[benchmark_config];
+      // Benchmark status
+      benchmark_ready_status[benchmark_key]['status']=config_ready_status[benchmark_config]&model_ready_status[benchmark_model]&dataset_ready_status[benchmark_dataset];
+
     }
     console.log(benchmark_ready_status)
     // Send benchmark ready status to client
@@ -820,11 +823,11 @@ function benchmark_ready(benchmark_name, benchmark_status){
   let params = Object(benchmark_status[benchmark_name]).keys()
 
   for (let i = 0; i<params.length; i++){
-    if (benchmark_status[benchmark_name][params[i]] == 0){
+    if (benchmark_status[benchmark_name][params[i]] == 0 && params[i]!="status"){
       return 0
     }
   }
-
+  benchmark_status[benchmark_name]["status"] = ready
   return ready
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -836,7 +839,7 @@ ipcMain.on('wsl:check', () => {
   // get_run_info();
   // parse_results_into_graphs();
   // list_configs();
-  // check_benchmarks();
+  check_benchmarks();
   // build_benchmarks();
   // run_benchmarks(["ssd-mobilenet"]);
 
@@ -913,7 +916,8 @@ ipcMain.on('benchmark:run', (e, args) => {
   // Check if benchmarks in args are all reeady to run
   benchmark_ready_status = check_benchmarks();
   for (i=0; i < args.length; i++){
-    if (benchmark_ready(args[i], benchmark_ready_status) == 0){
+    if (benchmark_ready_status[args[i]]['status'] == 0){
+    // if (benchmark_ready(args[i], benchmark_ready_status) == 0){
       throw new Error("Got command to run benchmark "+args[i]+ ", but it is not ready!");
     }
   }
