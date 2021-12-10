@@ -328,24 +328,44 @@ function imgRun() {
 
 function list_configs(){
   try{
-    let res1 = execSync('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
+    let config_process = exec('wsl bash -c "docker exec '+ CONTAINER_NAME + ' python print_configs_for_supported_gpu.py"');
 
-    let configs = res1.toString('utf8').replace(/\0/g, '').split('\n');
-    // console.log(configs);
-    let config_array = [];
-    for (let i=0; i<configs.length-1; i++){
-      // configs[i][-3] = " ";
-      // console.log(configs[i]);
-      let json_format = JSON.parse(configs[i])
+    let configs = ""
+    config_process.stdout.on('data', function (data) {
+      configs = data.toString('utf8').replace(/\0/g, '').split('\n');
+      // console.log(data);
+      // mainWindow.webContents.send("docker:pullMsg", data);
+      // mainWindow.webContents.send("docker:imgReady");
+    })
 
-      console.log(json_format);
-      if ('benchmark' in json_format){
-        config_ready_status[json_format['benchmark']] = 1;
+    // After ftp finishes, try to unzip data files
+    config_process.on('exit', (code) => {
+      console.log("Config process exit with status "+String(code));
+      if (code == 0){
+        
+        // Config process finished
+        // let configs = config_process.stdout.data//.toString('utf8').replace(/\0/g, '').split('\n');
+        
+        // console.log(configs);
+      let config_array = [];
+      for (let i=0; i<configs.length-1; i++){
+        // configs[i][-3] = " ";
+        // console.log(configs[i]);
+        let json_format = JSON.parse(configs[i])
+
+        console.log(json_format);
+        if ('benchmark' in json_format){
+          config_ready_status[json_format['benchmark']] = 1;
+        }
+        
+        config_array.push(json_format);
       }
-      
-      config_array.push(json_format);
-    }
-    mainWindow.webContents.send("scenario:supported_configs", config_array);
+      mainWindow.webContents.send("scenario:supported_configs", config_array);
+      }
+
+    })
+    
+    
 
 
     // console.log(config_ready_status);
@@ -839,7 +859,7 @@ ipcMain.on('wsl:check', () => {
   // get_run_info();
   // parse_results_into_graphs();
   // list_configs();
-  check_benchmarks();
+  // check_benchmarks();
   // build_benchmarks();
   // run_benchmarks(["ssd-mobilenet"]);
 
