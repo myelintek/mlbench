@@ -276,6 +276,33 @@ document.getElementById('downloadDatasets').addEventListener('click', (event) =>
   
 });
 
+ipcRenderer.on("download:models_status", (event, msg) => {
+  if (msg[0] == 1){
+    document.getElementById("mobilenetStatus").innerHTML = "Ready"; 
+  }
+  if (msg[1] == 1){
+    document.getElementById("resnet34Status").innerHTML = "Ready"; 
+  }
+  if (msg[2] == 1){
+    document.getElementById("resnet50Status").innerHTML = "Ready"; 
+  }
+  if (msg[3] == 1){
+    document.getElementById("bertStatus").innerHTML = "Ready"; 
+  }
+})
+
+ipcRenderer.on("download:datasets_status", (event, msg) => {
+  if (msg[0] == 1){
+    document.getElementById("cocoStatus").innerHTML = "Ready"; 
+  }
+  if (msg[1] == 1){
+    document.getElementById("imagenetStatus").innerHTML = "Ready"; 
+  }
+  if (msg[2] == 1){
+    document.getElementById("squadStatus").innerHTML = "Ready"; 
+  }
+})
+
 ipcRenderer.on("results:data_output", (event, msg) => {
   let chartStatus = Chart.getChart("chart"); // <canvas> id
   if (chartStatus != undefined) {
@@ -397,31 +424,4 @@ stepperElem.addEventListener('shown.bs-stepper', function (e) {
     ipcRenderer.send('results:check');
   }
   console.log('step shown', idx)
-})
-
-ipcRenderer.on("download:models_status", (event, msg) => {
-  if (msg[0] == 1){
-    document.getElementById("mobilenetStatus").innerHTML = "Ready"; 
-  }
-  if (msg[1] == 1){
-    document.getElementById("resnet34Status").innerHTML = "Ready"; 
-  }
-  if (msg[2] == 1){
-    document.getElementById("resnet50Status").innerHTML = "Ready"; 
-  }
-  if (msg[3] == 1){
-    document.getElementById("bertStatus").innerHTML = "Ready"; 
-  }
-})
-
-ipcRenderer.on("download:datasets_status", (event, msg) => {
-  if (msg[0] == 1){
-    document.getElementById("cocoStatus").innerHTML = "Ready"; 
-  }
-  if (msg[1] == 1){
-    document.getElementById("imagenetStatus").innerHTML = "Ready"; 
-  }
-  if (msg[2] == 1){
-    document.getElementById("squadStatus").innerHTML = "Ready"; 
-  }
 })
