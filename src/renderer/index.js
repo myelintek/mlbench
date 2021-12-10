@@ -303,6 +303,72 @@ ipcRenderer.on("download:datasets_status", (event, msg) => {
   }
 })
 
+ipcRenderer.on("benchmark:status", (event, msg) => {
+  for (const entry in msg) {
+    if (entry == "ssd-mobilenet"){
+      if (msg[entry]["model"] == 1){
+        document.getElementById("modelMobilenetStatus").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["dataset"] == 1){
+        document.getElementById("datasetMobilenetStatus").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["config"] == 1){
+        document.getElementById("scenarioMobilenetStatus").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["status"] == 1){
+        document.getElementById("statusMobilenetStatus").innerHTML = "Ready"; 
+      }
+    }
+    if (entry == "ssd-resnet34"){
+      if (msg[entry]["model"] == 1){
+        document.getElementById("modelResnet34Status").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["dataset"] == 1){
+        document.getElementById("datasetResnet34Status").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["config"] == 1){
+        document.getElementById("scenarioResnet34Status").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["status"] == 1){
+        document.getElementById("statusResnet34Status").innerHTML = "Ready"; 
+      }
+    }
+    if (entry == "resnet50"){
+      if (msg[entry]["model"] == 1){
+        document.getElementById("modelResnet50Status").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["dataset"] == 1){
+        document.getElementById("datasetResnet50Status").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["config"] == 1){
+        document.getElementById("scenarioResnet50Status").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["status"] == 1){
+        document.getElementById("statusResnet50Status").innerHTML = "Ready"; 
+      }
+    }
+    if (entry == "bert"){
+      if (msg[entry]["model"] == 1){
+        document.getElementById("modelBertStatus").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["dataset"] == 1){
+        document.getElementById("datasetBertStatus").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["config"] == 1){
+        document.getElementById("scenarioBertStatus").innerHTML = "Ready"; 
+      }
+      if (msg[entry]["status"] == 1){
+        document.getElementById("statusBertStatus").innerHTML = "Ready"; 
+      }
+    }
+  }
+})
+
+document.getElementById('runBenchmark').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('benchmark:run');  
+});
+
 ipcRenderer.on("results:data_output", (event, msg) => {
   let chartStatus = Chart.getChart("chart"); // <canvas> id
   if (chartStatus != undefined) {
@@ -331,6 +397,7 @@ ipcRenderer.on("results:data_output", (event, msg) => {
   // var inp_data = [37479.50, 13805.20, 6035.57];
   var inp_data = [47779.20, 18529.20, 7399.41];
 
+  // TODO: Remove this hardcode
   for (var key in msg['ssd-mobilenet']) {
     inp_labels.push(msg['ssd-mobilenet'][key]["gpu"]);
     inp_background_color.push('rgb(54, 162, 235)');
@@ -369,11 +436,6 @@ ipcRenderer.on("results:data_output", (event, msg) => {
   ctx.style.display = "block";
 
 })
-
-document.getElementById('runBenchmark').addEventListener('click', (event) => {
-  event.preventDefault();
-  ipcRenderer.send('benchmark:run');  
-});
 
 var stepperElem = document.querySelector('.bs-stepper');
 stepperElem.addEventListener('shown.bs-stepper', function (e) {
@@ -419,6 +481,9 @@ stepperElem.addEventListener('shown.bs-stepper', function (e) {
       squadCheckBox.checked = false;
     }
 
+  }
+  if (idx == 6){
+    ipcRenderer.send('benchmark:check');
   }
   if (idx == 7){
     ipcRenderer.send('results:check');
