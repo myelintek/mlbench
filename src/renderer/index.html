@@ -135,7 +135,6 @@
       </div>
       <div id="check-gpu" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-gpu-trigger">
         <div class="p-3">
-          <button id="gpuCheck" type="button" class="btn btn-primary">Check</button>
           <label id="gpuStatus"></label>
           <table id="gpuTable" class="table">
             <thead>
@@ -154,7 +153,6 @@
       </div>
       <div id="check-scenario" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-scenario-trigger">
         <div class="p-3">
-          <button id="scenarioCheck" type="button" class="btn btn-primary">Check</button>
           <table class="table">
             <thead>
               <tr>
@@ -233,13 +231,13 @@
             <tr>
               <td><input type="checkbox" id="resnet34Check"></td>
               <td>ssd-resnet34</td>
-              <td id="ssd-resnet34Status">Not Ready</td>
+              <td id="resnet34Status">Not Ready</td>
               <td>$MLPERF_SCRATCH_PATH/models/SSDResNet34</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="mobilenetCheck"></td>
               <td>ssd-mobilenet</td>
-              <td id="ssd-mobilenetStatus">Not Ready</td>
+              <td id="mobilenetStatus">Not Ready</td>
               <td>$MLPERF_SCRATCH_PATH/models/SSDMobileNet</td>
             </tr>
             <tr>
@@ -269,21 +267,21 @@
               <td><input type="checkbox" id="imageNetCheck"></td>
               <td>ImageNet 2012 Validation Set</td>
               <td>resnet50</td>
-              <td id="imagenetStatus">Unknown</td>
+              <td id="imagenetStatus">Not Ready</td>
               <td>$MLPERF_SCRATCH_PATH/preprocessed_data/imagenet</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="cocoCheck"></td>
               <td>COCO 2017 Dataset</td>
               <td>ssd-resnet34, ssd-mobilenet</td>
-              <td id="cocoStatus">Unknown</td>
+              <td id="cocoStatus">Not Ready</td>
               <td>$MLPERF_SCRATCH_PATH/preprocessed_data/coco</td>
             </tr>
             <tr>
               <td><input type="checkbox" id="squadCheck"></td>
               <td>SQuAD v1.1</td>
               <td>bert</td>
-              <td id="squadStatus">Unknown</td>
+              <td id="squadStatus">Not Ready</td>
               <td>$MLPERF_SCRATCH_PATH/preprocessed_data/squad_tokenized</td>
             </tr>
           </table>  
@@ -341,7 +339,6 @@
       </div>
       <div id="results" class="bs-stepper-pane" role="tabpanel" aria-labelledby="results-trigger">
         <div class="p-3">
-          <button id="checkResults" type="button" class="btn btn-primary">Check</button>
           <canvas id="chart" style="display: none;"></canvas>
         </div>
         <hr>

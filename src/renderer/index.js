@@ -31,10 +31,8 @@ document.getElementById('prevButton2').addEventListener('click', (event) => {
   stepper1.previous();
 });
 
-// next Download
 document.getElementById('nextButton3').addEventListener('click', (event) => {
   stepper1.next();
-  // ipcRenderer.send('download:check');
 });
 
 document.getElementById('prevButton3').addEventListener('click', (event) => {
@@ -45,7 +43,6 @@ document.getElementById('nextButton4').addEventListener('click', (event) => {
   stepper1.next();
 });
 
-// prev Download
 document.getElementById('prevButton4').addEventListener('click', (event) => {
   stepper1.previous();
 });
@@ -58,7 +55,6 @@ document.getElementById('prevButton5').addEventListener('click', (event) => {
   stepper1.previous();
 });
 
-// Button "Check"
 document.getElementById('wslCheckBtn').addEventListener('click', (event) => {
   event.preventDefault();
   ipcRenderer.send('wsl:check');
@@ -147,11 +143,6 @@ ipcRenderer.on("docker:run_fail", () => {
   document.getElementById("imgRunStatus").innerHTML = "Failed";
 })
 
-document.getElementById('gpuCheck').addEventListener('click', (event) => {
-  event.preventDefault();
-  ipcRenderer.send('gpu:check');
-});
-
 ipcRenderer.on("gpu:supported_systems", (event, msg) => {
   var tblBody = document.createElement("tbody");
   for (var i = 0; i < msg.length; i++) {
@@ -170,11 +161,6 @@ document.getElementById("gpuTable").append(tblBody)
 ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
   document.getElementById("gpuStatus").innerHTML = supp_msg;
 })
-
-document.getElementById('scenarioCheck').addEventListener('click', (event) => {
-  event.preventDefault();
-  ipcRenderer.send('scenario:check');
-});
 
 ipcRenderer.on("scenario:supported_configs", (event, msg) => {
   for (var i = 0; i < msg.length; i++) {
@@ -290,12 +276,12 @@ document.getElementById('downloadDatasets').addEventListener('click', (event) =>
   
 });
 
-document.getElementById('checkResults').addEventListener('click', (event) => {
-  event.preventDefault();
-  ipcRenderer.send('results:check');
-});
-
 ipcRenderer.on("results:data_output", (event, msg) => {
+  let chartStatus = Chart.getChart("chart"); // <canvas> id
+  if (chartStatus != undefined) {
+    chartStatus.destroy();
+  }
+
   var ctx = document.getElementById('chart'); //.getContext('2d');
   var inp_labels = [
     'DGX-A100_A100-SXM 4x1', 
@@ -365,5 +351,77 @@ document.getElementById('runBenchmark').addEventListener('click', (event) => {
 var stepperElem = document.querySelector('.bs-stepper');
 stepperElem.addEventListener('shown.bs-stepper', function (e) {
   var idx = e.detail.indexStep + 1;
+  if (idx == 3){
+    ipcRenderer.send('gpu:check');
+  }
+  if (idx == 4){
+    ipcRenderer.send('scenario:check');
+  }
+  if (idx == 5){
+    ipcRenderer.send('download:check');
+
+    var resnet50CheckBox = document.getElementById("resnet50Check");
+    if (resnet50CheckBox.checked == true){
+      resnet50CheckBox.checked = false;
+    }
+    var resnet34CheckBox = document.getElementById("resnet34Check");
+    if (resnet34CheckBox.checked == true){
+      resnet34CheckBox.checked = false;
+    }
+    var mobilenetCheckBox = document.getElementById("mobilenetCheck");
+    if (mobilenetCheckBox.checked == true){
+      mobilenetCheckBox.checked = false;
+    }
+    var bertCheckBox = document.getElementById("bertCheck");
+    if (bertCheckBox.checked == true){
+      bertCheckBox.checked = false;
+    }
+
+    var cocoCheckBox = document.getElementById("cocoCheck");
+    if (cocoCheckBox.checked == true){
+      cocoCheckBox.checked = false;
+    }
+  
+    var imageNetCheckBox = document.getElementById("imageNetCheck");
+    if (imageNetCheckBox.checked == true){
+      imageNetCheckBox.checked = false;
+    }
+    
+    var squadCheckBox = document.getElementById("squadCheck");
+    if (squadCheckBox.checked == true){
+      squadCheckBox.checked = false;
+    }
+
+  }
+  if (idx == 7){
+    ipcRenderer.send('results:check');
+  }
   console.log('step shown', idx)
+})
+
+ipcRenderer.on("download:models_status", (event, msg) => {
+  if (msg[0] == 1){
+    document.getElementById("mobilenetStatus").innerHTML = "Ready"; 
+  }
+  if (msg[1] == 1){
+    document.getElementById("resnet34Status").innerHTML = "Ready"; 
+  }
+  if (msg[2] == 1){
+    document.getElementById("resnet50Status").innerHTML = "Ready"; 
+  }
+  if (msg[3] == 1){
+    document.getElementById("bertStatus").innerHTML = "Ready"; 
+  }
+})
+
+ipcRenderer.on("download:datasets_status", (event, msg) => {
+  if (msg[0] == 1){
+    document.getElementById("cocoStatus").innerHTML = "Ready"; 
+  }
+  if (msg[1] == 1){
+    document.getElementById("imagenetStatus").innerHTML = "Ready"; 
+  }
+  if (msg[2] == 1){
+    document.getElementById("squadStatus").innerHTML = "Ready"; 
+  }
 })
