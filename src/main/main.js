@@ -79,6 +79,11 @@ function createMainWindow() {
     })
   })
 
+  window.webContents.on('new-window', function(e, url) {
+    e.preventDefault();
+    require('electron').shell.openExternal(url);
+  });
+
   const mainMenu = Menu.buildFromTemplate([]);
   Menu.setApplicationMenu(mainMenu);
 
