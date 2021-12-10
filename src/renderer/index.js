@@ -144,6 +144,7 @@ ipcRenderer.on("docker:run_fail", () => {
 })
 
 ipcRenderer.on("gpu:supported_systems", (event, msg) => {
+
   var tblBody = document.createElement("tbody");
   for (var i = 0; i < msg.length; i++) {
     var row = document.createElement("tr");
@@ -154,8 +155,10 @@ ipcRenderer.on("gpu:supported_systems", (event, msg) => {
       row.appendChild(cell);            
     }
     tblBody.appendChild(row);
-}
-document.getElementById("gpuTable").append(tblBody)
+  }
+  var tbl = document.getElementById("gpuTable");
+  tbl.innerHTML = "";
+  tbl.append(tblBody);
 })
 
 ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
