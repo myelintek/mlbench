@@ -28,6 +28,8 @@ var benchmark_ready_status = {"ssd-mobilenet":{"model":0,"dataset":0,"config":0}
                               "ssd-resnet34":{"model":0,"dataset":0,"config":0}, 
                               "resnet50":{"model":0,"dataset":0,"config":0}, 
                               "bert":{"model":0,"dataset":0,"config":0}}
+
+var benchmarks_build_flag = 0
 // const CONTAINER_NAME = "mlbenchmarks"
 
 const EventEmitter = require('events');
@@ -761,6 +763,7 @@ function build_benchmarks(){
       console.log("Build benchmarks exit code:"+String(code));
       if (code==0){
         console.log("Build run finished. But was it successful? (\/)0_0(\/)");
+        benchmarks_build_flag = 1;
         // Emit event that finished building
         myEmitter.emit('event', 1);
       }
@@ -773,40 +776,51 @@ function build_benchmarks(){
 // Run benchmarks
 function run_benchmarks(benchmark_names){
 
-  myEmitter.on('event', function(code) {
-    if (code == 1){
-      // Benchmark build finished, proceed with running
-      try {
 
-        let benchmark_run_args =""
-        for (let i=0; i<benchmark_names.length; i++){
-          benchmark_run_args=benchmark_names[i]+','+benchmark_run_args;
-        }
-        benchmark_run_args = benchmark_run_args.slice(0, -1);
-        console.log(benchmark_run_args);
-        // Run make build in the background
-        let run_process = exec(`wsl bash -c 'docker exec `+ CONTAINER_NAME + ` make run RUN_ARGS="--benchmarks=`+benchmark_run_args+` --scenarios=offline --fast"'`);
-        // Print out the log
-        run_process.stdout.on('data', function (data) {
-          console.log(data);
-          // mainWindow.webContents.send("docker:pullMsg", data);
-          // mainWindow.webContents.send("docker:imgReady");
-        })
-        // When the process finishes send build ready status
-        run_process.on('exit', (code) => {
-          console.log("Run benchmarks exit code:"+String(code));
-          if (code==0){
-            console.log("Run benchmarks finished. But was it successful? (\/)0_0(\/)");
-    
-            
-          }
-          
-        })
-      } catch (err) {
-        console.log(err);
-      }
+  try {
+
+    let benchmark_run_args =""
+    for (let i=0; i<benchmark_names.length; i++){
+      benchmark_run_args=benchmark_names[i]+','+benchmark_run_args;
     }
-  })
+    benchmark_run_args = benchmark_run_args.slice(0, -1);
+    console.log(benchmark_run_args);
+    // Run make build in the background
+    let run_process = exec(`wsl bash -c 'docker exec `+ CONTAINER_NAME + ` make run RUN_ARGS="--benchmarks=`+benchmark_run_args+` --scenarios=offline --fast"'`);
+    // Print out the log
+    run_process.stdout.on('data', function (data) {
+      console.log(data);
+      // mainWindow.webContents.send("docker:pullMsg", data);
+      // mainWindow.webContents.send("docker:imgReady");
+    })
+    // When the process finishes send build ready status
+    run_process.on('exit', (code) => {
+      console.log("Run benchmarks exit code:"+String(code));
+      if (code==0){
+        console.log("Run benchmarks finished. But was it successful? (\/)0_0(\/)");
+
+        
+      }
+      
+    })
+  } catch (err) {
+    console.log(err);
+  }
+
+}
+
+
+function benchmark_ready(benchmark_name, benchmark_status){
+  let ready = 1
+  let params = Object(benchmark_status[benchmark_name]).keys()
+
+  for (let i = 0; i<params.length; i++){
+    if (benchmark_status[benchmark_name][params[i]] == 0){
+      return 0
+    }
+  }
+
+  return ready
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -874,10 +888,45 @@ ipcMain.on('results:check', () => {
   mainWindow.webContents.send("results:data_output", parse_results_into_graphs());
 })
 
-ipcMain.on('benchmark:run', () => {
-  // TODO run benchmark
-  console.log("for Seryi");
-  check_benchmarks();
-  build_benchmarks();
-  run_benchmarks(["ssd-mobilenet"]);
+ipcMain.on('benchmark:check', () => {
+  
+  mainWindow.webContents.send("benchmark:status", check_benchmarks());
+})
+
+// ipcMain.on('benchmark:build', () => {
+//   // TODO run benchmark
+//   // check_benchmarks();
+//   if (!benchmarks_build_flag) {
+//     build_benchmarks();
+//   }
+
+
+  
+// })
+
+ipcMain.on('benchmark:run', (e, args) => {
+  // Check if benchmarks in args are all reeady to run
+  benchmark_ready_status = check_benchmarks();
+  for (i=0; i < args.length; i++){
+    if (benchmark_ready(args[i], benchmark_ready_status) == 0){
+      throw new Error("Got command to run benchmark "+args[i]+ ", but it is not ready!");
+    }
+  }
+  
+  if (!benchmarks_build_flag) {
+    build_benchmarks();
+    myEmitter.on('event', function(code) {
+      if (code == 1){
+        // Benchmark build finished, proceed with running
+        // Send build_ready message?
+        run_benchmarks(["ssd-mobilenet"]);
+      }
+    })
+  } else{
+    run_benchmarks(["ssd-mobilenet"]);
+  }
+  // Run given benchmarks
+  // run_benchmarks(args);
+  
+  
 })
