@@ -540,7 +540,12 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
   let ftpprocess = exec('wsl bash myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/ /data/mlcommon/'+path_prefix+' '+archives_to_download);
   ftpprocess.stdout.on('data', function (data) {
     console.log(data);
-    // mainWindow.webContents.send("docker:pullMsg", data);
+    if (path_prefix.includes("models")){
+      mainWindow.webContents.send("dowload:models_msg", data);
+    } else if (path_prefix.includes("datasets")){
+      mainWindow.webContents.send("dowload:dataset_msg", data);
+    }
+    
     // mainWindow.webContents.send("docker:imgReady");
   })
   // After ftp finishes, try to unzip data files
@@ -569,6 +574,11 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
           subprocesses.push(unzip_process)
           unzip_process.stdout.on('data', function (data) {
             console.log(data);
+            if (path_prefix.includes("models")){
+              mainWindow.webContents.send("dowload:models_msg", data);
+            } else if (path_prefix.includes("datasets")){
+              mainWindow.webContents.send("dowload:dataset_msg", data);
+            }
 
           });
           unzip_process.on('exit', (code) => {
@@ -783,6 +793,8 @@ function build_benchmarks(){
     // Print out the log
     build_process.stdout.on('data', function (data) {
       console.log(data);
+      mainWindow.webContents.send("benchmark:msg", data);
+      
       // mainWindow.webContents.send("docker:pullMsg", data);
       // mainWindow.webContents.send("docker:imgReady");
     })
@@ -818,6 +830,7 @@ function run_benchmarks(benchmark_names){
     // Print out the log
     run_process.stdout.on('data', function (data) {
       console.log(data);
+      mainWindow.webContents.send("benchmark:msg", data);
       // mainWindow.webContents.send("docker:pullMsg", data);
       // mainWindow.webContents.send("docker:imgReady");
     })
