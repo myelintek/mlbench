@@ -384,9 +384,17 @@ ipcRenderer.on("results:data_output", (event, msg) => {
   var charts = []
 
   // var inp_data = [37479.50, 13805.20, 6035.57];
-  let inp_data = [47779.20, 18529.20, 7399.41];
+  //SSD-Mobilenet
+  //Resnet
+  //SSD-Resnet34
+  //BERT
+  let inp_data = [[47779.20, 18529.20, 7399.41],
+                  [37479.50, 13805.20, 6035.57],
+                  [913.21, 316.49, 134.51],
+                  [3236.94, 1111.46, 375.89]
+                ];
   let chart_description = ['Object Detection, COCO, SSD-MobileNet, Offline', 
-                            'Image Recognition, COCO, ResNet50, Offline',
+                            'Image Recognition, Imagenet, ResNet50, Offline',
                             'Object Detection, COCO, SSD-ResNet34, Offline',
                             'NLP, Squadv1.1, BERT, Offline'];
 
@@ -420,10 +428,12 @@ ipcRenderer.on("results:data_output", (event, msg) => {
     ];
     let benchmark = msg_keys[i];
     for (var key in msg[benchmark]){
-      inp_labels.push(msg[benchmark][key]["gpu"]);
+      // inp_labels.push(msg[benchmark][key]["gpu"]);
+      let gpu_params = msg[benchmark][key]["gpu"].split('_');
+      inp_labels.push(key+" "+gpu_params[0]);
       inp_background_color.push('rgb(54, 162, 235)');
       inp_border_color.push('rgb(54, 162, 235)');
-      inp_data.push(msg[benchmark][key]["result"])
+      inp_data[i].push(msg[benchmark][key]["result"])
     }
     
 
@@ -434,7 +444,7 @@ ipcRenderer.on("results:data_output", (event, msg) => {
         datasets: [{
           backgroundColor: inp_background_color,
           borderColor: inp_border_color,
-          data: inp_data
+          data: inp_data[i]
         }]
       },
       options: {
