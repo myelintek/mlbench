@@ -328,29 +328,54 @@ function runDocker() {
 function imgRun() {
   try {
     // Clone the repo
-    let res = execSync("wsl git clone https://github.com/myelintek/inference_results_v1.1 --branch wsl --single-branch");
-    let so = res.toString('utf8').replace(/\0/g, '');
-    console.log(so);
+    let clone_proc = exec('wsl bash -c "git clone --progress --verbose https://github.com/myelintek/inference_results_v1.1 --branch wsl --single-branch"');
+    // let so = res.toString('utf8').replace(/\0/g, '');
+    // console.log(so);
 
-    runDocker()
+    clone_proc.stderr.on('data', function (data) {
+      let so1 = data.toString('utf8').replace(/\0/g, '');
+      console.log(so1);
+      // mainWindow.webContents.send("benchmark:msg", data);
+      
+      mainWindow.webContents.send("docker:pullMsg", data);
+      // mainWindow.webContents.send("docker:imgReady");
+    })
+    // When the process finishes send build ready status
+    clone_proc.on('exit', (code) => {
+      console.log("Clone repo exit code:"+String(code));
+      if (code==0 || code == 128){
+        console.log("Clone repo finished. But was it successful? (\/)0_0(\/)");
+        // Emit event that finished building
+        // myEmitter.emit('event', 1);
+        
+        runDocker();
+      
+        // console.log("Probably the repo already exists");
+        
+      } else {
+        throw new Error("Failed to clone the repo");
+      }
+      
+    })
 
   } catch (err) {
     let msg = err.output.toString()
-    if  (msg.includes("exists")){
-      // Still pass if folder's already there
-      try{
-        runDocker()
+    mainWindow.webContents.send("docker:run_fail", msg);
+    // if  (msg.includes("exists")){
+    //   // Still pass if folder's already there
+    //   try{
+    //     runDocker()
 
-      } catch (err2) {
-        let msg = err2.output.toString();
-        console.log(msg)
-        mainWindow.webContents.send("docker:run_fail", msg);
-      }
+    //   } catch (err2) {
+    //     let msg = err2.output.toString();
+    //     console.log(msg)
+    //     mainWindow.webContents.send("docker:run_fail", msg);
+    //   }
       
-    }
-    else{
-      mainWindow.webContents.send("docker:run_fail", msg);
-    }
+    // }
+    // else{
+    //   mainWindow.webContents.send("docker:run_fail", msg);
+    // }
   }
 }
 
