@@ -386,6 +386,10 @@ document.getElementById('runBenchmark').addEventListener('click', (event) => {
   ipcRenderer.send('benchmark:run');  
 });
 
+ipcRenderer.on("benchmark:msg", (event, msg) => {
+  document.getElementById("runBenchmarksConsole").innerHTML += "</br>" + msg;
+})
+
 ipcRenderer.on("results:data_output", (event, msg) => {
   
 
