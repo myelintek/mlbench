@@ -312,6 +312,14 @@ ipcRenderer.on("download:datasets_status", (event, msg) => {
   }
 })
 
+ipcRenderer.on("download:models_msg", (event, msg) => {
+  document.getElementById("downloadModelsConsole").innerHTML += "</br>" + msg;
+})
+
+ipcRenderer.on("download:dataset_msg", (event, msg) => {
+  document.getElementById("downloadDatasetsConsole").innerHTML += "</br>" + msg;
+})
+
 ipcRenderer.on("benchmark:status", (event, msg) => {
   for (const entry in msg) {
     if (entry == "ssd-mobilenet"){
