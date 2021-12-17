@@ -277,20 +277,45 @@ function runDocker() {
     let so1 = res1.toString('utf8').replace(/\0/g, '');
     // console.log(so1)
     if (so1.includes(CONTAINER_NAME)){
-      console.log("Container already running! Don't need to build")
+      console.log("Container already running! Don't need to build");
+      echoContainer();
     } else{
       // Probably don't need to build the image if we have already pulled it, should be the same image, just need to map the paths correctly using prebuild
       try{
-        execSync("wsl export NO_BUILD=1");
-        let res1 = execSync('wsl bash -c "export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
-        let so1 = res1.toString('utf8').replace(/\0/g, '');
+        // execSync("wsl export NO_BUILD=1");
+        // Synchronous call
+        // let res1 = execSync('wsl bash -c "export NO_BUILD=1 && export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
+        // let so1 = res1.toString('utf8').replace(/\0/g, '');
+        // Asynchronous call
+        let docker_launch_proc = exec('wsl bash -c "export NO_BUILD=1 && export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
         
+        docker_launch_proc.stdout.on('data', function (data) {
+          let so1 = data.toString('utf8').replace(/\0/g, '');
+          console.log(so1);
+          // mainWindow.webContents.send("benchmark:msg", data);
+          
+          mainWindow.webContents.send("docker:pullMsg", data);
+          // mainWindow.webContents.send("docker:imgReady");
+        })
+        // When the process finishes send build ready status
+        docker_launch_proc.on('exit', (code) => {
+          console.log("Run container exit code:"+String(code));
+          if (code==0){
+            console.log("Run container finished. But was it successful? (\/)0_0(\/)");
+            // Emit event that finished building
+            // myEmitter.emit('event', 1);
+            echoContainer();
+          }
+          
+        })
+        
+        // 
       } catch (err){
         let msg = err.output.toString()
         console.log(msg)
       }
     }
-    echoContainer()
+    // echoContainer()
   } catch (err) {
     let msg = err.output.toString()
     console.log(msg)
