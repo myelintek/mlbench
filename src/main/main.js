@@ -973,26 +973,44 @@ ipcMain.on('benchmark:check', () => {
 
 ipcMain.on('benchmark:run', (e, args) => {
   // Check if benchmarks in args are all reeady to run
-  benchmark_ready_status = check_benchmarks();
-  for (i=0; i < args.length; i++){
-    if (benchmark_ready_status[args[i]]['status'] == 0){
-    // if (benchmark_ready(args[i], benchmark_ready_status) == 0){
-      throw new Error("Got command to run benchmark "+args[i]+ ", but it is not ready!");
+  try {
+    console.log("Args format:")
+    console.log(args);
+    benchmark_ready_status = check_benchmarks();
+    console.log(args.length);
+    let benchmarks_to_run = [];
+    
+    for (let i=0; i < args.length; i++){
+      if (args[i] == 1){
+        if (benchmark_ready_status[VALID_BENCHMARKS[i]]['status'] == 0){
+          // if (benchmark_ready(args[i], benchmark_ready_status) == 0){
+            throw new Error("Got command to run benchmark "+VALID_BENCHMARKS[i]+ ", but it is not ready!");
+          }
+          else{
+            benchmarks_to_run.push(VALID_BENCHMARKS[i]);
+          }
+      }
+      
     }
+    
+    if (!benchmarks_build_flag) {
+      build_benchmarks();
+      myEmitter.on('event', function(code) {
+        if (code == 1){
+          // Benchmark build finished, proceed with running
+          // Send build_ready message?
+          // run_benchmarks(["ssd-mobilenet"]);
+          run_benchmarks(benchmarks_to_run);
+        }
+      })
+    } else{
+      // run_benchmarks(["ssd-mobilenet"]);
+      run_benchmarks(benchmarks_to_run);
+    }
+  } catch (err) {
+    console.log(err);
   }
   
-  if (!benchmarks_build_flag) {
-    build_benchmarks();
-    myEmitter.on('event', function(code) {
-      if (code == 1){
-        // Benchmark build finished, proceed with running
-        // Send build_ready message?
-        run_benchmarks(["ssd-mobilenet"]);
-      }
-    })
-  } else{
-    run_benchmarks(["ssd-mobilenet"]);
-  }
   // Run given benchmarks
   // run_benchmarks(args);
   
