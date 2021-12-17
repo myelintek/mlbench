@@ -383,7 +383,35 @@ ipcRenderer.on("benchmark:status", (event, msg) => {
 
 document.getElementById('runBenchmark').addEventListener('click', (event) => {
   event.preventDefault();
-  ipcRenderer.send('benchmark:run');  
+  const benchmarks = [0, 0, 0, 0]
+  // Get the checkbox
+  var resnet50CheckBox = document.getElementById("resnet50BenchmarkCheck");
+  // If the checkbox is checked, display the output text
+  if (resnet50CheckBox.checked == true){
+    benchmarks[2] = 1
+  }
+
+  // Get the checkbox
+  var resnet34CheckBox = document.getElementById("resnet34BenchmarkCheck");
+  // If the checkbox is checked, display the output text
+  if (resnet34CheckBox.checked == true){
+    benchmarks[1] = 1
+  }
+  
+  // Get the checkbox
+  var mobilenetCheckBox = document.getElementById("mobilenetBenchmarkCheck");
+  // If the checkbox is checked, display the output text
+  if (mobilenetCheckBox.checked == true){
+    benchmarks[0] = 1
+  }
+
+  // Get the checkbox
+  var bertCheckBox = document.getElementById("bertBenchmarkCheck");
+  // If the checkbox is checked, display the output text
+  if (bertCheckBox.checked == true){
+    benchmarks[3] = 1
+  }
+  ipcRenderer.send('benchmark:run', benchmarks);  
 });
 
 ipcRenderer.on("benchmark:msg", (event, msg) => {
