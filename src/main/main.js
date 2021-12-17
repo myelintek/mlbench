@@ -566,9 +566,10 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
   ftpprocess.stdout.on('data', function (data) {
     console.log(data);
     if (path_prefix.includes("models")){
-      mainWindow.webContents.send("dowload:models_msg", data);
+      console.log("enter model ftp")
+      mainWindow.webContents.send("download:models_msg", data);
     } else if (path_prefix.includes("preprocessed_data")){
-      mainWindow.webContents.send("dowload:dataset_msg", data);
+      mainWindow.webContents.send("download:dataset_msg", data);
     }
     
     // mainWindow.webContents.send("docker:imgReady");
