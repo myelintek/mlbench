@@ -32,6 +32,8 @@ var benchmark_ready_status = {"ssd-mobilenet":{"model":0,"dataset":0,"config":0,
 var benchmarks_build_flag = 0
 // const CONTAINER_NAME = "mlbenchmarks"
 
+const benchmark_repo_address = "inference_results_v1.1/closed/MyelinTek/"
+
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter {}
 
@@ -287,7 +289,8 @@ function runDocker() {
         // let res1 = execSync('wsl bash -c "export NO_BUILD=1 && export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
         // let so1 = res1.toString('utf8').replace(/\0/g, '');
         // Asynchronous call
-        let docker_launch_proc = exec('wsl bash -c "export NO_BUILD=1 && export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd inference_results_v1.1/closed/MyelinTek && make prebuild" ');
+        
+        let docker_launch_proc = exec('wsl bash -c "export NO_BUILD=1 && export MLPERF_SCRATCH_PATH='+MLPERF_SCRATCH_PATH +' && cd '+benchmark_repo_address+' && make prebuild" ');
         
         docker_launch_proc.stdout.on('data', function (data) {
           let so1 = data.toString('utf8').replace(/\0/g, '');
@@ -473,7 +476,7 @@ function list_supported_systems(){
 function check_scratch_path(){
   // Sanity check if scratch path is there
   //command = ' [ -d "/mnt/c/mlcommon/" ] && echo "exists" || echo "not found" '
-  let res1 = execSync('wsl bash check_dir_script.sh');
+  let res1 = execSync('wsl bash '+benchmark_repo_address+'check_dir_script.sh');
   let msg = res1.toString('utf8').replace(/\0/g, '');
   console.log(msg)
   if (msg.includes("Exists")){
@@ -493,7 +496,7 @@ function check_folders(path_prefix, directory_names){
   readiness.fill(0);
 
   for (let i=0; i<directory_names.length; i++){
-    let res = execSync('wsl bash check_dir_script.sh ' +path_prefix+'/'+directory_names[i]);
+    let res = execSync('wsl bash '+benchmark_repo_address+'check_dir_script.sh ' +path_prefix+'/'+directory_names[i]);
     let msg = res.toString('utf8').replace(/\0/g, '');
     console.log(msg)
     if (msg.includes("Exists")){
@@ -562,7 +565,7 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
     return 1;
   }
   // exec does not block the program! Should do the same for other long operations
-  let ftpprocess = exec('wsl bash myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/ /data/mlcommon/'+path_prefix+' '+archives_to_download);
+  let ftpprocess = exec('wsl bash '+benchmark_repo_address+'myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/ /data/mlcommon/'+path_prefix+' '+archives_to_download);
   ftpprocess.stdout.on('data', function (data) {
     console.log(data);
     if (path_prefix.includes("models")){
