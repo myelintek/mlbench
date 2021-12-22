@@ -484,13 +484,13 @@ ipcRenderer.on("results:data_output", (event, msg) => {
   //SSD-Resnet34
   //BERT
   let inp_data = [[47779.20, 18529.20, 7399.41],
-                  [37479.50, 13805.20, 6035.57],
                   [913.21, 316.49, 134.51],
+                  [37479.50, 13805.20, 6035.57],
                   [3236.94, 1111.46, 375.89]
                 ];
   let chart_description = ['Object Detection, COCO, SSD-MobileNet, Offline', 
-                            'Image Recognition, Imagenet, ResNet50, Offline',
                             'Object Detection, COCO, SSD-ResNet34, Offline',
+                            'Image Recognition, Imagenet, ResNet50, Offline',
                             'NLP, Squadv1.1, BERT, Offline'];
 
   let msg_keys = Object.keys(msg);
