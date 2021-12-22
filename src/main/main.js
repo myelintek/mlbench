@@ -71,6 +71,9 @@ function createMainWindow() {
   }
 
   window.on('closed', () => {
+    let res = execSync('wsl bash -c "docker stop mlperf-inference-x86_64"')
+    let so = res.toString("utf8").replace(/\0/g, '');
+    console.log("Exit docker container: "+so);
     mainWindow = null
   })
 
