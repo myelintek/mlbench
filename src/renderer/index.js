@@ -439,6 +439,22 @@ document.getElementById('runBenchmark').addEventListener('click', (event) => {
   ipcRenderer.send('benchmark:run', benchmarks);  
 });
 
+ipcRenderer.on("benchmark:run_status", (event, msg) => {
+  document.getElementById("benchmarkRunStatus").innerHTML = msg;
+  if (msg == "Building..."){
+    document.getElementById('runBenchmark').disabled = true;
+  } else if (msg == "Running..."){
+    document.getElementById('runBenchmark').disabled = true;
+  } else {
+    document.getElementById('runBenchmark').disabled = false;
+  }
+
+  if (msg == "Running Finished!"){
+    document.getElementById('results-trigger').disabled = false;
+    document.getElementById('nextButton5').disabled = false;
+  }
+})
+
 ipcRenderer.on("benchmark:msg", (event, msg) => {
   document.getElementById("runBenchmarksConsole").innerHTML += "</br>" + msg;
 })
