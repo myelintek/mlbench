@@ -2,6 +2,8 @@
 const { ipcRenderer } = require('electron');
 const Stepper = require('bs-stepper');
 const Chart = require('chart.js');
+import "./css/bs-stepper.css"
+import "./js/bs-stepper.js"
 
 var stepper1 = new Stepper(document.querySelector('#stepper1'), {
   linear: false
@@ -301,6 +303,7 @@ ipcRenderer.on("download:models_status", (event, msg) => {
 })
 
 ipcRenderer.on("download:datasets_status", (event, msg) => {
+  console.log(msg);
   if (msg[0] == 1){
     document.getElementById("cocoStatus").innerHTML = "Ready"; 
   }
