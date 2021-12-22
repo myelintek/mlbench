@@ -866,7 +866,8 @@ function build_benchmarks(){
   try {
     // Run make build in the background
     let build_process = exec('wsl bash -c "docker exec '+ CONTAINER_NAME + ' make build"');
-    mainWindow.webContents.send("benchmark:run_status", true);
+    mainWindow.webContents.send("benchmark:run_status", "Building...");
+    
     // Print out the log
     build_process.stdout.on('data', function (data) {
       console.log(data);
@@ -881,10 +882,11 @@ function build_benchmarks(){
       if (code==0){
         console.log("Build run finished. But was it successful? (\/)0_0(\/)");
         benchmarks_build_flag = 1;
+        mainWindow.webContents.send("benchmark:run_status", "Building Finished!");
         // Emit event that finished building
         myEmitter.emit('event', 1);
       }
-      
+      mainWindow.webContents.send("benchmark:run_status", "Building Failed!");
     })
   } catch (err) {
     console.log(err);
@@ -904,7 +906,7 @@ function run_benchmarks(benchmark_names){
     console.log(benchmark_run_args);
     // Run make build in the background
     let run_process = exec(`wsl bash -c 'docker exec `+ CONTAINER_NAME + ` make run RUN_ARGS="--benchmarks=`+benchmark_run_args+` --scenarios=offline --fast"'`);
-    mainWindow.webContents.send("benchmark:run_status", true);
+    mainWindow.webContents.send("benchmark:run_status", "Running...");
     // Print out the log
     run_process.stdout.on('data', function (data) {
       console.log(data);
@@ -918,9 +920,9 @@ function run_benchmarks(benchmark_names){
       if (code==0){
         console.log("Run benchmarks finished. But was it successful? (\/)0_0(\/)");
         
-        
+        mainWindow.webContents.send("benchmark:run_status", "Running Finished!");
       }
-      mainWindow.webContents.send("benchmark:run_status", false);
+      mainWindow.webContents.send("benchmark:run_status", "Running Failed!");
     })
   } catch (err) {
     console.log(err);
