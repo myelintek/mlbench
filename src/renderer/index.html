@@ -173,15 +173,12 @@
         <h1>Supported GPUs</h1>
         <hr>
         <div class="p-3">
-          
           <tbody>
             Supported systems can be found in <b>inference_results_v1.1\closed\MyelinTek\code\common\system_list.py</b>. To add a system, you need to manually input your GPU information in the <b>KnownSystems</b> class.
             <br>
             <b>Status:</b>
             <label id="gpuStatus"></label>
-
-          </tbody>
-            
+          </tbody>            
           <table id="gpuTable" class="table">
             <thead>
               <tr>
@@ -192,6 +189,7 @@
               </tr>  
             </thead>
           </table>
+          <button type="button" class="btn btn-primary" id="gpuCheckBtn">Check</button>
         </div>
         <hr>
         <button id="prevButton1">Previous</button>
@@ -201,10 +199,8 @@
         <h1>Available benchmark configurations </h1>
         <hr>
         <div class="p-3">
-          
           <tbody>Check for available benchmark configurations for your GPU. Config files for a benchmark/scenario pair can be found in <b>inference_results_v1.1\closed\MyelinTek\configs\[BENCHMARK]\[SCENARIO]\__init__.py</b>
           <br>To add a config for a specific benchmark, say SSD-Mobilenet, and the Offline scenario, please modify <b>inference_results_v1.1\closed\MyelinTek\configs\ssd-mobilenet\Offline\__init__.py</b> and add your own configuration.
-          
           </tbody>
           <table class="table">
             <thead>
@@ -255,7 +251,8 @@
                 </pre>
               </td>
             </tr>
-          </table>  
+          </table>
+          <button type="button" class="btn btn-primary" id="scenarioCheckBtn">Check</button>
         </div>
         <hr>
         <button id="prevButton2">Previous</button>    
@@ -408,7 +405,7 @@
               <td id="statusBertStatus">Not Ready</td>
             </tr>
           </table>
-          <b>Benchmark Status</b>
+          <b>Benchmark Status: </b>
           <label id="benchmarkRunStatus">Not Ready</label>        
           <hr>
           <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;overflow:scroll;" id="runBenchmarksConsole">

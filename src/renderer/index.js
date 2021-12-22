@@ -188,6 +188,11 @@ ipcRenderer.on("gpu:is_supported", (event, supp_msg) => {
   document.getElementById("gpuStatus").innerHTML = supp_msg;
 })
 
+document.getElementById('gpuCheckBtn').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('gpu:check');
+});
+
 ipcRenderer.on("scenario:supported_configs", (event, msg) => {
   for (var i = 0; i < msg.length; i++) {
     var tempPre = document.getElementById(msg[i]["benchmark"]);
@@ -237,6 +242,11 @@ document.getElementById('extend4').addEventListener('click', (event) => {
     x.style.display = "none";
     document.getElementById('fa4').classList.toggle("fa-plus");
   }
+});
+
+document.getElementById('scenarioCheckBtn').addEventListener('click', (event) => {
+  event.preventDefault();
+  ipcRenderer.send('scenario:check');
 });
 
 document.getElementById('downloadModels').addEventListener('click', (event) => {
