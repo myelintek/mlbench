@@ -131,8 +131,10 @@ function checkWSL() {
     let so = res.toString("utf8").replace(/\0/g, '');
     mainWindow.webContents.send("wsl:pass");
     mainWindow.webContents.send("wsl:note", so);
+    return true;
   } catch (err) {
     mainWindow.webContents.send("wsl:fail");
+    return false;
   }
 }
 
@@ -145,10 +147,12 @@ function checkUbuntu() {
       mainWindow.webContents.send("ub:pass");
       console.log(so)
       mainWindow.webContents.send("ub:note", so)
+      return true;
     }
   } catch (err) {
     console.log(err.message)
     mainWindow.webContents.send("ub:fail");
+    return false;
   }
 }
 
@@ -156,8 +160,10 @@ function sudonpStatus() {
   try {
     let res = execSync("wsl sudo -n true")
     mainWindow.webContents.send("sudo:pass")
+    return true;
   } catch (err) {
     mainWindow.webContents.send("sudo:fail")
+    return false;
   }
 }
 
@@ -172,11 +178,16 @@ function checkDocker() {
       console.log(res)
       so = res.toString('utf8').replace(/\0/g, '');
       mainWindow.webContents.send("docker:note", so);
+      return true;
+    }
+    else{
+      return false;
     }
   } catch (err) {
     let msg = err.output.toString()
     mainWindow.webContents.send("docker:fail");
     mainWindow.webContents.send("docker:note", msg);
+    return false;
   }
 }
 
@@ -218,11 +229,13 @@ function checkNvidia() {
     let so = res.toString('utf8');
     mainWindow.webContents.send("nv:pass")
     mainWindow.webContents.send("nv:status", so)
+    return true;
   } catch (err) {
     let msg = err.output.toString()
     console.log(msg)
     mainWindow.webContents.send("nv:fail");
     mainWindow.webContents.send("nv:status", msg);
+    return false;
   }
 }
 
@@ -932,14 +945,16 @@ ipcMain.on('wsl:check', () => {
   // check_benchmarks();
   // build_benchmarks();
   // run_benchmarks(["ssd-mobilenet"]);
-
-  checkWSL();
-  checkUbuntu();
-  sudonpStatus();
-  checkDocker();
-  setupEnv();
-  checkNvidia();
+  let flag = true;
+  flag = checkWSL() && flag;
+  flag = checkUbuntu() && flag;
+  flag = sudonpStatus() && flag;
+  flag = checkDocker() && flag;
+  // flag = flag && setupEnv();
+  flag = checkNvidia()&& flag;
   // checkImage();
+  console.log(flag)
+  mainWindow.webContents.send("wsl:full_status", flag);
 });
 
 ipcMain.on('wsl:envSetup', () => {
