@@ -860,6 +860,7 @@ function build_benchmarks(){
   try {
     // Run make build in the background
     let build_process = exec('wsl bash -c "docker exec '+ CONTAINER_NAME + ' make build"');
+    mainWindow.webContents.send("benchmark:run_status", true);
     // Print out the log
     build_process.stdout.on('data', function (data) {
       console.log(data);
@@ -897,6 +898,7 @@ function run_benchmarks(benchmark_names){
     console.log(benchmark_run_args);
     // Run make build in the background
     let run_process = exec(`wsl bash -c 'docker exec `+ CONTAINER_NAME + ` make run RUN_ARGS="--benchmarks=`+benchmark_run_args+` --scenarios=offline --fast"'`);
+    mainWindow.webContents.send("benchmark:run_status", true);
     // Print out the log
     run_process.stdout.on('data', function (data) {
       console.log(data);
@@ -909,10 +911,10 @@ function run_benchmarks(benchmark_names){
       console.log("Run benchmarks exit code:"+String(code));
       if (code==0){
         console.log("Run benchmarks finished. But was it successful? (\/)0_0(\/)");
-
+        
         
       }
-      
+      mainWindow.webContents.send("benchmark:run_status", false);
     })
   } catch (err) {
     console.log(err);
