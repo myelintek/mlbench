@@ -194,13 +194,17 @@ document.getElementById('gpuCheckBtn').addEventListener('click', (event) => {
 });
 
 ipcRenderer.on("scenario:supported_configs", (event, msg) => {
+  console.log(msg);
   for (var i = 0; i < msg.length; i++) {
+    document.getElementById('extend' + msg[i]["benchmark"]).hidden = false;
+    document.getElementById('scenario' + msg[i]["benchmark"] + 'Config').innerHTML = msg[i]["scenario"];
+    document.getElementById('class' + msg[i]["benchmark"] + 'Config').innerHTML = msg[i]["system"];    
     var tempPre = document.getElementById(msg[i]["benchmark"]);
     tempPre.innerHTML = JSON.stringify(msg[i]).replace(/,/g, "\n");
   }
 })
 
-document.getElementById('extend1').addEventListener('click', (event) => {
+document.getElementById('extendResNet50').addEventListener('click', (event) => {
   var x = document.getElementById("ResNet50");
   if (x.style.display === "none") {
     x.style.display = "block";
@@ -211,7 +215,7 @@ document.getElementById('extend1').addEventListener('click', (event) => {
   }
 });
 
-document.getElementById('extend2').addEventListener('click', (event) => {
+document.getElementById('extendSSDResNet34').addEventListener('click', (event) => {
   var x = document.getElementById("SSDResNet34");
   if (x.style.display === "none") {
     x.style.display = "block";
@@ -222,7 +226,7 @@ document.getElementById('extend2').addEventListener('click', (event) => {
   }
 });
 
-document.getElementById('extend3').addEventListener('click', (event) => {
+document.getElementById('extendSSDMobileNet').addEventListener('click', (event) => {
   var x = document.getElementById("SSDMobileNet");
   if (x.style.display === "none") {
     x.style.display = "block";
@@ -233,7 +237,7 @@ document.getElementById('extend3').addEventListener('click', (event) => {
   }
 });
 
-document.getElementById('extend4').addEventListener('click', (event) => {
+document.getElementById('extendBERT').addEventListener('click', (event) => {
   var x = document.getElementById("BERT");
   if (x.style.display === "none") {
     x.style.display = "block";
