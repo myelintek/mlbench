@@ -13,42 +13,42 @@
       </div>
       <div class="bs-stepper-line"></div>
       <div class="step" data-target="#setup-lunch-environment">
-        <button type="button" class="step-trigger" role="tab" aria-controls="setup-lunch-environment" id="setup-lunch-environment-trigger" aria-selected="false">
+        <button type="button" class="step-trigger" role="tab" aria-controls="setup-lunch-environment" id="setup-lunch-environment-trigger" aria-selected="false" disabled>
           <span class="bs-stepper-circle">2</span>
           <span class="bs-stepper-label">Setup&Launch</span>
         </button>
       </div>
       <div class="bs-stepper-line"></div>
       <div class="step" data-target="#check-gpu">
-        <button type="button" class="step-trigger" role="tab" aria-controls="check-gpu" id="check-gpu-trigger" aria-selected="false">
+        <button type="button" class="step-trigger" role="tab" aria-controls="check-gpu" id="check-gpu-trigger" aria-selected="false" disabled>
           <span class="bs-stepper-circle">3</span>
           <span class="bs-stepper-label">Check GPU</span>
         </button>
       </div>
       <div class="bs-stepper-line"></div>
       <div class="step" data-target="#check-scenario">
-        <button type="button" class="step-trigger" role="tab" aria-controls="check-scenario" id="check-scenario-trigger" aria-selected="false">
+        <button type="button" class="step-trigger" role="tab" aria-controls="check-scenario" id="check-scenario-trigger" aria-selected="false" disabled>
           <span class="bs-stepper-circle">4</span>
           <span class="bs-stepper-label">Check Scenario</span>
         </button>
       </div>
       <div class="bs-stepper-line"></div>
       <div class="step" data-target="#download">
-        <button type="button" class="step-trigger" role="tab" aria-controls="download" id="download-trigger" aria-selected="false">
+        <button type="button" class="step-trigger" role="tab" aria-controls="download" id="download-trigger" aria-selected="false" disabled>
           <span class="bs-stepper-circle">5</span>
           <span class="bs-stepper-label">Download</span>
         </button>
       </div>
       <div class="bs-stepper-line"></div>
       <div class="step" data-target="#run-benchmark">
-        <button type="button" class="step-trigger" role="tab" aria-controls="run-benchmark" id="run-benchmark-trigger" aria-selected="false">
+        <button type="button" class="step-trigger" role="tab" aria-controls="run-benchmark" id="run-benchmark-trigger" aria-selected="false" disabled>
           <span class="bs-stepper-circle">6</span>
           <span class="bs-stepper-label">Run Benchmark</span>
         </button>
       </div>
       <div class="bs-stepper-line"></div>
       <div class="step" data-target="#results">
-        <button type="button" class="step-trigger" role="tab" aria-controls="results" id="results-trigger" aria-selected="false">
+        <button type="button" class="step-trigger" role="tab" aria-controls="results" id="results-trigger" aria-selected="false" disabled>
           <span class="bs-stepper-circle">7</span>
           <span class="bs-stepper-label">Results</span>
         </button>
@@ -128,7 +128,7 @@
           <button type="button" class="btn btn-primary" id="wslCheckBtn">Check</button>
         </div>
         <hr>
-        <button id="nextButton">Next</button>
+        <button id="nextButton" disabled>Next</button>
       </div>
       <div id="setup-lunch-environment" class="bs-stepper-pane" role="tabpanel" aria-labelledby="setup-lunch-environment-trigger">
         <h1>Setup Environment</h1>
@@ -150,25 +150,24 @@
         <hr>
           
           <div class="p-3">
-          <tbody>
-            <b>Pull the docker image:</b>
-          </tbody>
-          <button type="button" class="btn btn-primary" id="imgPull">Pull</button>
-          <label id="imgPullStatus">Not Ready</label>
-          
-          <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;overflow:scroll;" id="imgPullConsole">
-      
-          </div>
-          <tbody>
-            <b>Launch the docker image:</b>
-          </tbody>
-          <button type="button" class="btn btn-primary" id="imgRun">Run</button>
-          <label id="imgRunStatus">Not Ready</label>
-          
+            <tbody>
+              <b>Pull the docker image:</b>
+            </tbody>
+            <button type="button" class="btn btn-primary" id="imgPull" disabled>Pull</button>
+            <label id="imgPullStatus">Not Ready</label>
+            
+            <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;overflow:scroll;" id="imgPullConsole">
+        
+            </div>
+            <tbody>
+              <b>Launch the docker image:</b>
+            </tbody>
+            <button type="button" class="btn btn-primary" id="imgRun" disabled>Run</button>
+            <label id="imgRunStatus">Not Ready</label>          
           </div>
         <hr>
         <button id="prevButton">Previous</button>
-        <button id="nextButton1">Next</button>
+        <button id="nextButton1" disabled>Next</button>
       </div>
       <div id="check-gpu" class="bs-stepper-pane" role="tabpanel" aria-labelledby="check-gpu-trigger">
         <h1>Supported GPUs</h1>
@@ -364,7 +363,7 @@
           <br>Choose benchmarks that are ready and run them.
         </tbody>
         <div class="p-3">
-          <button id="runBenchmark" type="button" class="btn btn-primary">Run Benchmark</button>
+          <button id="runBenchmark" type="button" class="btn btn-primary" disabled>Run Benchmark</button>
           <table class="table">
             <thead>
               <tr>
@@ -377,7 +376,7 @@
               </tr>  
             </thead>
             <tr>
-              <td><input type="checkbox" id="resnet50BenchmarkCheck"></td>
+              <td><input type="checkbox" id="resnet50BenchmarkCheck" disabled></td>
               <td>ResNet50</td>
               <td id="modelResnet50Status">Not Ready</td>
               <td id="datasetResnet50Status">Not Ready</td>
@@ -385,7 +384,7 @@
               <td id="statusResnet50Status">Not Ready</td>
             </tr>
             <tr>
-              <td><input type="checkbox" id="resnet34BenchmarkCheck"></td>
+              <td><input type="checkbox" id="resnet34BenchmarkCheck" disabled></td>
               <td>SSD-Resnet34</td>
               <td id="modelResnet34Status">Not Ready</td>
               <td id="datasetResnet34Status">Not Ready</td>
@@ -393,7 +392,7 @@
               <td id="statusResnet34Status">Not Ready</td>
             </tr>
             <tr>
-              <td><input type="checkbox" id="mobilenetBenchmarkCheck"></td>
+              <td><input type="checkbox" id="mobilenetBenchmarkCheck" disabled></td>
               <td>SSD-Mobilenet</td>
               <td id="modelMobilenetStatus">Not Ready</td>
               <td id="datasetMobilenetStatus">Not Ready</td>
@@ -401,7 +400,7 @@
               <td id="statusMobilenetStatus">Not Ready</td>
             </tr>
             <tr>
-              <td><input type="checkbox" id="bertBenchmarkCheck"></td>
+              <td><input type="checkbox" id="bertBenchmarkCheck" disabled></td>
               <td>Bert</td>
               <td id="modelBertStatus">Not Ready</td>
               <td id="datasetBertStatus">Not Ready</td>
@@ -414,7 +413,7 @@
         </div>
         <hr>
         <button id="prevButton4">Previous</button>
-        <button id="nextButton5">Next</button>
+        <button id="nextButton5" disabled>Next</button>
       </div>
       <div id="results" class="bs-stepper-pane" role="tabpanel" aria-labelledby="results-trigger">
         <h1>Compare results of 4 different benchmarks</h1>

@@ -108,8 +108,16 @@ ipcRenderer.on("nv:fail", () => {
   document.getElementById("nvStatus").innerHTML = "Fail"
 })
 
+ipcRenderer.on("wsl:full_status", (event, flag) => {
+  if (flag == true){
+    document.getElementById('setup-lunch-environment-trigger').disabled = false;
+    document.getElementById('nextButton').disabled = false;
+  }
+})
+
 ipcRenderer.on("env:pass", () => {
   document.getElementById("wslEnvStatus").innerHTML = "Ready"
+  document.getElementById('imgPull').disabled = false;
 })
 
 ipcRenderer.on("env:fail", (event, msg) => {
@@ -141,10 +149,17 @@ ipcRenderer.on("docker:pullMsg", (event, msg) => {
 
 ipcRenderer.on("docker:imgReady", () => {
   document.getElementById("imgPullStatus").innerHTML = "Ready";
+  document.getElementById('imgRun').disabled = false;
+
 })
 
 ipcRenderer.on("docker:run_pass", () => {
   document.getElementById("imgRunStatus").innerHTML = "Ready";
+  document.getElementById('check-gpu-trigger').disabled = false;
+  document.getElementById('check-scenario-trigger').disabled = false;
+  document.getElementById('download-trigger').disabled = false;
+  document.getElementById('run-benchmark-trigger').disabled = false;
+  document.getElementById('nextButton1').disabled = false;
 })
 
 ipcRenderer.on("docker:run_fail", () => {
@@ -303,7 +318,6 @@ ipcRenderer.on("download:models_status", (event, msg) => {
 })
 
 ipcRenderer.on("download:datasets_status", (event, msg) => {
-  console.log(msg);
   if (msg[0] == 1){
     document.getElementById("cocoStatus").innerHTML = "Ready"; 
   }
@@ -337,6 +351,8 @@ ipcRenderer.on("benchmark:status", (event, msg) => {
       }
       if (msg[entry]["status"] == 1){
         document.getElementById("statusMobilenetStatus").innerHTML = "Ready"; 
+        document.getElementById("mobilenetBenchmarkCheck").disabled = false;
+        document.getElementById('runBenchmark').disabled = false;
       }
     }
     if (entry == "ssd-resnet34"){
@@ -350,7 +366,9 @@ ipcRenderer.on("benchmark:status", (event, msg) => {
         document.getElementById("scenarioResnet34Status").innerHTML = "Ready"; 
       }
       if (msg[entry]["status"] == 1){
-        document.getElementById("statusResnet34Status").innerHTML = "Ready"; 
+        document.getElementById("statusResnet34Status").innerHTML = "Ready";
+        document.getElementById("resnet34BenchmarkCheck").disabled = false;
+        document.getElementById('runBenchmark').disabled = false;
       }
     }
     if (entry == "resnet50"){
@@ -364,7 +382,9 @@ ipcRenderer.on("benchmark:status", (event, msg) => {
         document.getElementById("scenarioResnet50Status").innerHTML = "Ready"; 
       }
       if (msg[entry]["status"] == 1){
-        document.getElementById("statusResnet50Status").innerHTML = "Ready"; 
+        document.getElementById("statusResnet50Status").innerHTML = "Ready";
+        document.getElementById("resnet50BenchmarkCheck").disabled = false;
+        document.getElementById('runBenchmark').disabled = false;
       }
     }
     if (entry == "bert"){
@@ -379,6 +399,8 @@ ipcRenderer.on("benchmark:status", (event, msg) => {
       }
       if (msg[entry]["status"] == 1){
         document.getElementById("statusBertStatus").innerHTML = "Ready"; 
+        document.getElementById("bertBenchmarkCheck").disabled = false;
+        document.getElementById('runBenchmark').disabled = false;
       }
     }
   }
