@@ -613,10 +613,17 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
   }
   // exec does not block the program! Should do the same for other long operations
   let ftpprocess = exec('wsl bash '+benchmark_repo_address+'myftpscript.sh '+MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/ /data/mlcommon/'+path_prefix+' '+archives_to_download);
+  if (path_prefix.includes("models")){
+    mainWindow.webContents.send("models:download_status", "Downloading...");
+  } else if (path_prefix.includes("preprocessed_data")){
+    mainWindow.webContents.send("datasets:download_status", "Downloading...");
+  }
+  
   ftpprocess.stdout.on('data', function (data) {
     console.log(data);
     if (path_prefix.includes("models")){
       console.log("enter model ftp")
+
       mainWindow.webContents.send("download:models_msg", data);
     } else if (path_prefix.includes("preprocessed_data")){
       mainWindow.webContents.send("download:dataset_msg", data);
@@ -637,6 +644,11 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
       //unzip /mnt/c/mlcommon/models/SSDMobileNet.zip -d /mnt/c/mlcommon/models/
       //Unzip all data archives 1 by 1
       // let unzip_command_base = 'unzip '+MLPERF_SCRATCH_PATH+ '/models/'
+      if (path_prefix.includes("models")){
+        mainWindow.webContents.send("models:download_status", "Download finished!");
+      } else if (path_prefix.includes("preprocessed_data")){
+        mainWindow.webContents.send("datasets:download_status", "Download finished!");
+      }
       let subprocesses = []
       for (let i=0;i<selected_data.length; i++){
         if (selected_data[i] == 1) {
@@ -644,10 +656,16 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
           let unzip_command =  "unzip -o "+MLPERF_SCRATCH_PATH+ "/"+path_prefix+"/"+directory_names[i] + ".zip -d "+ MLPERF_SCRATCH_PATH+ '/'+path_prefix+'/"';
           // Can we spawn multiple subprocesses to unzip concurrently?
           // Or do we need to use the same subprocess to launch commands?
-
           // Try multiple subprocesses
           let unzip_process = exec('wsl bash -c "' + unzip_command);
           subprocesses.push(unzip_process)
+
+          if (path_prefix.includes("models")){
+            mainWindow.webContents.send("models:download_status", "Extracting...");
+          } else if (path_prefix.includes("preprocessed_data")){
+            mainWindow.webContents.send("datasets:download_status", "Extracting...");
+          }
+
           unzip_process.stdout.on('data', function (data) {
             console.log(data);
             if (path_prefix.includes("models")){
@@ -661,6 +679,11 @@ function ftp_unzip(path_prefix, directory_names,selected_data){
             subprocesses.pop()
             if (subprocesses.length == 0){
               // Emitt an event that indicates finishing all unzipping
+              // if (path_prefix.includes("models")){
+              //   mainWindow.webContents.send("models:download_status", "Extraction finished!");
+              // } else if (path_prefix.includes("preprocessed_data")){
+              //   mainWindow.webContents.send("datasets:download_status", "Extraction finished!");
+              // }
               myEmitter.emit('event', 0);
             }
           })
@@ -688,7 +711,7 @@ function update_data(control_string, selected_data){
     } else {
       throw new Error('Unnknown control string');
     }
-
+    
     ftp_unzip(path_prefix, directory_names, selected_data);
   
     myEmitter.on('event', function(code) {
@@ -697,8 +720,10 @@ function update_data(control_string, selected_data){
         console.log(control_string+" ready status: "+String(readiness))
         //Send model status to client
         if (control_string == "models"){
+          mainWindow.webContents.send("models:download_status", "Finished");
           mainWindow.webContents.send("download:models_status", readiness);
         } else if (control_string == "datasets"){
+          mainWindow.webContents.send("datasets:download_status", "Finished");
           mainWindow.webContents.send("download:datasets_status", readiness);
         } else {
           throw new Error('Unsupported control string '+control_string);
@@ -709,6 +734,11 @@ function update_data(control_string, selected_data){
     
   } catch(err){
     // let msg = err.output.toString();
+    if (control_string == "models"){
+      mainWindow.webContents.send("models:download_status", "Failed!");
+    } else if (control_string == "datasets"){
+      mainWindow.webContents.send("datasets:download_status", "Failed!");
+    }
     console.log(err)
   }
   
