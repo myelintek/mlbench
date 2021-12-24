@@ -137,34 +137,32 @@
           Create directory to store benchmark models and datasets. Default is <b>C:\mlcommon</b> in Windows which is mapped to <b>/mnt/c/mlcommon/</b> in Ubuntu WSL.
           <br>This <a href="https://github.com/myelintek/inference_results_v1.1" target="_blank">GitHub repository</a> is required to run benchmarks and is cloned onto your machine.
         </tbody>
-        <hr>
-          <div class="p-3">
-              <button type="button" class="btn btn-primary" id="wslEnvSetup">Setup</button>
-              <label id="wslEnvStatus">Not Ready</label>
-          </div>
+        <div class="p-3">
+            <tbody>
+              <b>Create folders:</b>
+            </tbody>
+            <button type="button" class="btn btn-primary" id="wslEnvSetup">Setup</button>
+            <label id="wslEnvStatus">Not Ready</label>
+        </div>
         <hr>
         <h1>Prepare benchmark docker environment</h1>
         <tbody>
           Benchmarks need to be run in a prebuild docker container to easily meet all dependencies. Pull and run the image, if it is not already running.
         </tbody>
-        <hr>
-          
-          <div class="p-3">
-            <tbody>
-              <b>Pull the docker image:</b>
-            </tbody>
-            <button type="button" class="btn btn-primary" id="imgPull" disabled>Pull</button>
-            <label id="imgPullStatus">Not Ready</label>
-            
-            <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;overflow:scroll;" id="imgPullConsole">
-        
-            </div>
-            <tbody>
-              <b>Launch the docker image:</b>
-            </tbody>
-            <button type="button" class="btn btn-primary" id="imgRun" disabled>Run</button>
-            <label id="imgRunStatus">Not Ready</label>          
+        <div class="p-3">
+          <tbody>
+            <b>Pull the docker image:</b>
+          </tbody>
+          <button type="button" class="btn btn-primary" id="imgPull" disabled>Pull</button>
+          <label id="imgPullStatus">Not Ready</label>
+          <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;overflow:scroll;" id="imgPullConsole">
           </div>
+          <tbody>
+            <b>Launch the docker image:</b>
+          </tbody>
+          <button type="button" class="btn btn-primary" id="imgRun" disabled>Run</button>
+          <label id="imgRunStatus">Not Ready</label>          
+        </div>
         <hr>
         <button id="prevButton">Previous</button>
         <button id="nextButton1" disabled>Next</button>
@@ -405,7 +403,9 @@
               <td id="statusBertStatus">Not Ready</td>
             </tr>
           </table>
-          <b>Benchmark Status: </b>
+          <tbody>
+            <b>Benchmark Status: </b>
+          </tbody>
           <label id="benchmarkRunStatus">Not Ready</label>        
           <hr>
           <div class="p-3 mb-2 bg-dark text-white" style="width:800px;height:200px;overflow:scroll;" id="runBenchmarksConsole">
