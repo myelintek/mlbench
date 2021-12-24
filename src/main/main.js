@@ -885,8 +885,10 @@ function build_benchmarks(){
         mainWindow.webContents.send("benchmark:run_status", "Building Finished!");
         // Emit event that finished building
         myEmitter.emit('event', 1);
+      }else{
+        mainWindow.webContents.send("benchmark:run_status", "Building Failed!");
       }
-      mainWindow.webContents.send("benchmark:run_status", "Building Failed!");
+      
     })
   } catch (err) {
     console.log(err);
@@ -921,8 +923,10 @@ function run_benchmarks(benchmark_names){
         console.log("Run benchmarks finished. But was it successful? (\/)0_0(\/)");
         
         mainWindow.webContents.send("benchmark:run_status", "Running Finished!");
+      }else{
+        mainWindow.webContents.send("benchmark:run_status", "Running Failed!");
       }
-      mainWindow.webContents.send("benchmark:run_status", "Running Failed!");
+      
     })
   } catch (err) {
     console.log(err);
