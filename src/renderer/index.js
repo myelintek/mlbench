@@ -343,6 +343,28 @@ ipcRenderer.on("download:datasets_status", (event, msg) => {
   }
 })
 
+ipcRenderer.on("models:download_status", (event, msg) => {
+  document.getElementById("modelsDownloadStatus").innerHTML = msg;
+  if (msg == "Downloading..."){
+    document.getElementById('downloadModels').disabled = true;
+  } else if (msg == "Extracting..."){
+    document.getElementById('downloadModels').disabled = true;
+  } else {
+    document.getElementById('downloadModels').disabled = false;
+  }
+})
+
+ipcRenderer.on("datasets:download_status", (event, msg) => {
+  document.getElementById("datasetsDownloadStatus").innerHTML = msg;
+  if (msg == "Downloading..."){
+    document.getElementById('downloadDatasets').disabled = true;
+  } else if (msg == "Extracting..."){
+    document.getElementById('downloadDatasets').disabled = true;
+  } else {
+    document.getElementById('downloadDatasets').disabled = false;
+  }
+})
+
 ipcRenderer.on("download:models_msg", (event, msg) => {
   document.getElementById("downloadModelsConsole").innerHTML += "</br>" + msg;
 })
